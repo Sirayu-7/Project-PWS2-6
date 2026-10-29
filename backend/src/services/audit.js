@@ -1,0 +1,1 @@
+const db=require('../db');async function writeAudit({userId=null,action,tableName,recordId=null}){await db.execute('INSERT INTO audit_logs (user_id,action,table_name,record_id) VALUES (?,?,?,?)',[userId,action,tableName,recordId])}module.exports={writeAudit};

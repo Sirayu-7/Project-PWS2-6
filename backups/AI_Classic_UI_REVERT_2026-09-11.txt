@@ -1,0 +1,1 @@
+UI rollback marker: DashboardView.vue was reverted from the Premium dashboard to the classic/pre-Premium presentation on 2026-09-11. The Premium safety ZIP is AI_Premium_Current_Safety_2026-09-11.zip.

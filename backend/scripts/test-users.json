@@ -1,0 +1,4 @@
+{
+  "staff": { "username": "staff", "password": "Staff@1234", "name": "Test Staff" },
+  "borrower": { "username": "borrower", "password": "Borrower@1234", "name": "Test Borrower" }
+}

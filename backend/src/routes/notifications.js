@@ -1,0 +1,11 @@
+const express=require('express');
+const db=require('../db');
+const {authenticateToken,requirePermission}=require('../middleware/auth');
+const {PERMISSIONS}=require('../config/permissions');
+const router=express.Router();
+router.use(authenticateToken);
+router.get('/',requirePermission(PERMISSIONS.NOTIFICATION_READ),async(req,res)=>{try{const [rows]=await db.execute('SELECT notification_id,title,message,is_read,created_at FROM notifications WHERE user_id=? ORDER BY created_at DESC LIMIT 100',[req.user.id]);res.json({success:true,data:rows})}catch(e){res.status(500).json({success:false,message:'ไม่สามารถโหลดการแจ้งเตือนได้'})}});
+router.get('/unread-count',requirePermission(PERMISSIONS.NOTIFICATION_READ),async(req,res)=>{try{const [rows]=await db.execute('SELECT COUNT(*) AS count FROM notifications WHERE user_id=? AND is_read=0',[req.user.id]);res.json({success:true,count:Number(rows[0].count)})}catch(e){res.status(500).json({success:false,message:'ไม่สามารถตรวจสอบการแจ้งเตือนได้'})}});
+router.put('/read-all',requirePermission(PERMISSIONS.NOTIFICATION_UPDATE),async(req,res)=>{try{await db.execute('UPDATE notifications SET is_read=1 WHERE user_id=? AND is_read=0',[req.user.id]);res.json({success:true,message:'อ่านการแจ้งเตือนทั้งหมดแล้ว'})}catch(e){res.status(400).json({success:false,message:'ไม่สามารถอัปเดตการแจ้งเตือนได้'})}});
+router.put('/:id/read',requirePermission(PERMISSIONS.NOTIFICATION_UPDATE),async(req,res)=>{try{await db.execute('UPDATE notifications SET is_read=1 WHERE notification_id=? AND user_id=?',[req.params.id,req.user.id]);res.json({success:true,message:'อ่านการแจ้งเตือนแล้ว'})}catch(e){res.status(400).json({success:false,message:'ไม่สามารถอัปเดตการแจ้งเตือนได้'})}});
+module.exports=router;

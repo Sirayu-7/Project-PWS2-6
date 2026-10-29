@@ -1,0 +1,16 @@
+{
+  "name": "it-equipment-management",
+  "version": "1.0.0",
+  "private": true,
+  "description": "IT Equipment Management System (ระบบจัดการอุปกรณ์ IT)",
+  "scripts": {
+    "setup": "npm run install:all && npm run init:db",
+    "install:all": "cd backend && npm install && cd ../frontend && npm install",
+    "init:db": "cd backend && npm run init-db",
+    "seed": "cd backend && npm run init-db",
+    "dev:backend": "cd backend && npm run dev",
+    "dev:frontend": "cd frontend && npm run dev",
+    "start": "cmd /c start.bat",
+    "stop": "cmd /c stop.bat"
+  }
+}
