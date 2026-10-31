@@ -35,7 +35,8 @@ const dbName = process.env.DB_NAME || 'it_equipment_db';
       port,
       user,
       password,
-      multipleStatements: true
+      multipleStatements: true,
+      ssl: process.env.DB_SSL === 'true' ? { rejectUnauthorized: false } : undefined
     });
   } catch (err) {
     console.error('\n[ERROR] ไม่สามารถเชื่อมต่อกับ MySQL Server ได้:');
