@@ -403,7 +403,13 @@ async function handleWebhookEvent(event) {
       }
 
       // Keyword: รายการยืมของฉัน
-      if (text === 'รายการยืมของฉัน' || text === 'ยืมอะไรอยู่' || text === 'สถานะการยืม') {
+      if (
+        text === 'รายการยืมของฉัน' ||
+        text === 'ยืมอะไรอยู่' ||
+        text === 'สถานะการยืม' ||
+        text.includes('รายการยืมของฉัน') ||
+        text.includes('ยืมของฉัน')
+      ) {
         const [myLoans] = await pool.execute(`
           SELECT l.*, e.equipment_name, e.asset_code
           FROM loans l
@@ -419,7 +425,13 @@ async function handleWebhookEvent(event) {
       }
 
       // Keyword: คำขอรออนุมัติ (สำหรับ Staff/Admin)
-      if (text === 'คำขอรออนุมัติ' || text === 'รออนุมัติ' || text === 'อนุมัติคำขอ') {
+      if (
+        text === 'คำขอรออนุมัติ' ||
+        text === 'รออนุมัติ' ||
+        text === 'อนุมัติคำขอ' ||
+        text.includes('คำขอรออนุมัติ') ||
+        text.includes('รออนุมัติ')
+      ) {
         if (!['Administrator', 'Staff'].includes(currentUser.role_name)) {
           await lineService.replyMessage(event.replyToken, {
             type: 'text',
@@ -430,7 +442,7 @@ async function handleWebhookEvent(event) {
         }
 
         const [pendingLoans] = await pool.execute(`
-          SELECT l.*, e.equipment_name, e.asset_code, u.name AS borrower_name, u.department
+          SELECT l.*, e.equipment_name, e.asset_code, u.name AS borrower_name
           FROM loans l
           JOIN equipment e ON e.equipment_id = l.equipment_id
           JOIN users u ON u.user_id = l.borrower_id
@@ -455,14 +467,21 @@ async function handleWebhookEvent(event) {
       }
 
       // Keyword: รายการแจ้งซ่อม (สำหรับ Staff/Admin)
-      if (text === 'รายการแจ้งซ่อม' || text === 'งานซ่อม' || text === 'แจ้งซ่อม') {
+      if (
+        text === 'รายการแจ้งซ่อม' ||
+        text === 'งานซ่อม' ||
+        text === 'แจ้งซ่อม' ||
+        text.includes('รายการแจ้งซ่อม') ||
+        text.includes('งานซ่อม') ||
+        text.includes('แจ้งซ่อม')
+      ) {
         const [tickets] = await pool.execute(`
           SELECT m.*, e.equipment_name, e.asset_code, u.name AS reporter_name
           FROM maintenance m
           JOIN equipment e ON e.equipment_id = m.equipment_id
           JOIN users u ON u.user_id = m.reporter_id
           WHERE m.status IN ('Reported', 'In_Progress')
-          ORDER BY m.ticket_id DESC
+          ORDER BY m.maintenance_id DESC
           LIMIT 5
         `);
 
@@ -478,7 +497,8 @@ async function handleWebhookEvent(event) {
         let reply = `🔧 รายการแจ้งซ่อมที่กำลังดำเนินการ (${tickets.length} รายการล่าสุด):`;
         tickets.forEach((t, idx) => {
           const statusText = t.status === 'In_Progress' ? 'กำลังซ่อม' : 'รอดำเนินการ';
-          reply += `\n\n${idx + 1}. #${t.ticket_id} ${t.equipment_name} [${t.asset_code}]\n   อาการ: ${t.issue_description || '-'}\n   ผู้แจ้ง: ${t.reporter_name} (${statusText})`;
+          const issue = t.problem_description || t.problem_type || '-';
+          reply += `\n\n${idx + 1}. #${t.maintenance_id} ${t.equipment_name} [${t.asset_code}]\n   อาการ: ${issue}\n   ผู้แจ้ง: ${t.reporter_name} (${statusText})`;
         });
         reply += '\n\nเข้าดูรายละเอียดและจัดการได้ที่หน้าเว็บครับ';
 
@@ -491,7 +511,12 @@ async function handleWebhookEvent(event) {
       }
 
       // Keyword: อุปกรณ์ว่าง
-      if (text === 'อุปกรณ์ว่าง' || text === 'เช็คอุปกรณ์' || text === 'ค้นหาอุปกรณ์') {
+      if (
+        text === 'อุปกรณ์ว่าง' ||
+        text === 'เช็คอุปกรณ์' ||
+        text === 'ค้นหาอุปกรณ์' ||
+        text.includes('อุปกรณ์ว่าง')
+      ) {
         const [counts] = await pool.execute("SELECT COUNT(*) AS total FROM equipment WHERE status = 'Available'");
         const [items] = await pool.execute(`
           SELECT e.equipment_name, e.asset_code, c.category_name
@@ -522,7 +547,13 @@ async function handleWebhookEvent(event) {
       }
 
       // Keyword: ช่วยเหลือ / เมนู
-      if (text === 'ช่วยเหลือ' || text === 'เมนู' || text.toLowerCase() === 'help') {
+      if (
+        text === 'ช่วยเหลือ' ||
+        text === 'เมนู' ||
+        text.toLowerCase() === 'help' ||
+        text.includes('ช่วยเหลือ') ||
+        text.includes('เมนู')
+      ) {
         const isStaff = ['Administrator', 'Staff'].includes(currentUser.role_name);
         let helpText = `🤖 เมนูระบบ IT Equipment Bot\nคุณ: ${currentUser.name} (${currentUser.role_name})\n\nคำสั่งที่สามารถแตะปุ่มลัดด้านล่างได้เลย:\n• 📋 รายการยืมของฉัน - ดูอุปกรณ์ที่คุณกำลังยืม\n• 📦 อุปกรณ์ว่าง - ตรวจสอบสต็อกอุปกรณ์พร้อมใช้`;
         if (isStaff) {
