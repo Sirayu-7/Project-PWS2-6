@@ -3,7 +3,7 @@
   <div v-else class="app-shell">
     <aside class="sidebar">
       <div class="brand">
-        <div class="brand-icon">IT</div>
+        <img src="/logo.png" alt="Logo" class="sidebar-logo" />
         <div class="brand-copy">
           <strong>IT Equipment</strong>
           <span>Management System</span>
@@ -388,6 +388,16 @@ onUnmounted(closeRealtime)
 </script>
 
 <style scoped>
+.sidebar-logo {
+  width: 40px;
+  height: 40px;
+  object-fit: contain;
+  border-radius: 10px;
+  background: #ffffff;
+  padding: 2px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  flex-shrink: 0;
+}
 .clickable-profile {
   cursor: pointer;
   padding: 6px 10px;
