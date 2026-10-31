@@ -125,6 +125,7 @@
         <div class="profile-tabs">
           <button :class="{ active: profileTab === 'name' }" @click="profileTab = 'name'">ข้อมูลส่วนตัว</button>
           <button :class="{ active: profileTab === 'password' }" @click="profileTab = 'password'">เปลี่ยนรหัสผ่าน</button>
+          <button :class="{ active: profileTab === 'line' }" @click="openLineTab">การเชื่อมต่อ LINE</button>
         </div>
 
         <!-- Tab 1: Edit Name -->
@@ -162,6 +163,52 @@
             </button>
           </div>
         </form>
+
+        <!-- Tab 3: LINE Integration -->
+        <div v-if="profileTab === 'line'" class="line-tab-content">
+          <div v-if="lineStatus.loading" class="line-loading">กำลังตรวจสอบสถานะการเชื่อมต่อ...</div>
+
+          <div v-else-if="lineStatus.linked" class="line-status-box linked">
+            <div class="line-badge-icon">✅</div>
+            <div class="line-info">
+              <h4>เชื่อมต่อกับ LINE เรียบร้อยแล้ว</h4>
+              <p>คุณจะได้รับข้อความแจ้งเตือนผลการยืม-คืน แจ้งซ่อม และทำรายการผ่าน LINE Bot ได้ทันที</p>
+              <div class="line-id-tag">LINE User ID: <code>{{ lineStatus.line_user_id }}</code></div>
+            </div>
+            <div class="modal-actions">
+              <button type="button" @click="showProfileModal = false">ปิด</button>
+              <button type="button" class="btn-danger-outline" @click="unlinkLine" :disabled="lineStatus.unlinking">
+                {{ lineStatus.unlinking ? 'กำลังยกเลิก...' : 'ยกเลิกการเชื่อมต่อ LINE' }}
+              </button>
+            </div>
+          </div>
+
+          <div v-else class="line-status-box unlinked">
+            <div class="line-badge-icon">💬</div>
+            <h4>ยังไม่ได้เชื่อมต่อบัญชี LINE</h4>
+            <p>ผูกบัญชีเพื่อรับแจ้งเตือนสถานะการยืม แจ้งซ่อม เตือนก่อนครบกำหนดคืน และกดอนุมัติคำขอผ่าน LINE</p>
+
+            <div v-if="linePin" class="pin-card">
+              <span class="pin-label">รหัสสำหรับเชื่อมต่อ LINE (PIN 6 หลัก)</span>
+              <div class="pin-number">{{ linePin }}</div>
+              <small class="pin-expiry">⏱ รหัสนี้มีอายุใช้งาน 10 นาที (คงเหลือ {{ pinTimerSeconds }} วินาที)</small>
+              <div class="pin-steps">
+                <strong>วิธีเปิดใช้งาน:</strong>
+                <ol>
+                  <li>เพิ่มเพื่อน LINE Official Account ของระบบไอที</li>
+                  <li>ส่งข้อความรหัสตัวเลข <b>{{ linePin }}</b> เข้าไปในห้องแชท</li>
+                  <li>ระบบจะทำการยืนยันและผูกบัญชีให้อัตโนมัติทันที</li>
+                </ol>
+              </div>
+            </div>
+
+            <div v-else class="modal-actions" style="justify-content: center; margin-top: 18px;">
+              <button type="button" class="primary" @click="requestLinePin" :disabled="lineStatus.requestingPin">
+                {{ lineStatus.requestingPin ? 'กำลังสร้างรหัส...' : 'ขอรหัสเชื่อมต่อ LINE (PIN)' }}
+              </button>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -204,6 +251,70 @@ const passwords = ref({ old_password: '', new_password: '', confirm_password: ''
 const savingProfile = ref(false)
 const profileSuccess = ref('')
 const profileError = ref('')
+
+// LINE Integration
+const lineStatus = ref({ loading: false, linked: false, line_user_id: null, unlinking: false, requestingPin: false })
+const linePin = ref(null)
+const pinTimerSeconds = ref(600)
+let pinInterval = null
+
+async function checkLineStatus() {
+  lineStatus.value.loading = true
+  try {
+    const { data } = await api.get('/line/status')
+    lineStatus.value.linked = data.linked
+    lineStatus.value.line_user_id = data.line_user_id
+  } catch (e) {
+    console.error('LINE_STATUS_ERROR:', e)
+  } finally {
+    lineStatus.value.loading = false
+  }
+}
+
+function openLineTab() {
+  profileTab.value = 'line'
+  profileSuccess.value = ''
+  profileError.value = ''
+  checkLineStatus()
+}
+
+async function requestLinePin() {
+  lineStatus.value.requestingPin = true
+  profileError.value = ''
+  try {
+    const { data } = await api.post('/line/link-token')
+    linePin.value = data.pin_code
+    pinTimerSeconds.value = data.expires_in || 600
+    if (pinInterval) clearInterval(pinInterval)
+    pinInterval = setInterval(() => {
+      pinTimerSeconds.value--
+      if (pinTimerSeconds.value <= 0) {
+        clearInterval(pinInterval)
+        linePin.value = null
+      }
+    }, 1000)
+  } catch (e) {
+    profileError.value = e.response?.data?.message || 'ไม่สามารถขอรหัสเชื่อมต่อได้'
+  } finally {
+    lineStatus.value.requestingPin = false
+  }
+}
+
+async function unlinkLine() {
+  if (!confirm('คุณต้องการยกเลิกการเชื่อมต่อบัญชี LINE ใช่หรือไม่?')) return
+  lineStatus.value.unlinking = true
+  try {
+    await api.post('/line/unlink')
+    lineStatus.value.linked = false
+    lineStatus.value.line_user_id = null
+    linePin.value = null
+    profileSuccess.value = 'ยกเลิกการเชื่อมต่อ LINE เรียบร้อยแล้ว'
+  } catch (e) {
+    profileError.value = e.response?.data?.message || 'ไม่สามารถยกเลิกการเชื่อมต่อได้'
+  } finally {
+    lineStatus.value.unlinking = false
+  }
+}
 
 function openProfileModal() {
   profileName.value = user.value.name || ''
@@ -351,6 +462,15 @@ const connectRealtime = () => {
   })
   source.addEventListener('data:refresh', (event) => {
     window.dispatchEvent(new CustomEvent('it-equipment:data-refresh', { detail: JSON.parse(event.data || '{}') }))
+  })
+  source.addEventListener('line:linked', (event) => {
+    const payload = JSON.parse(event.data || '{}')
+    lineStatus.value.linked = true
+    lineStatus.value.line_user_id = payload.line_user_id
+    linePin.value = null
+    if (pinInterval) clearInterval(pinInterval)
+    profileSuccess.value = 'ผูกบัญชี LINE สำเร็จเรียบร้อยแล้ว!'
+    playNotificationSound()
   })
   source.onerror = () => {
     if (realtime.value === source) {
@@ -560,5 +680,93 @@ onUnmounted(closeRealtime)
 .alert.success {
   background: #dcfce7;
   color: #166534;
+}
+.line-status-box {
+  padding: 20px;
+  border-radius: 12px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  text-align: center;
+}
+.line-status-box.linked {
+  background: #f0fdf4;
+  border-color: #bbf7d0;
+}
+.line-badge-icon {
+  font-size: 32px;
+  margin-bottom: 8px;
+}
+.line-status-box h4 {
+  margin: 0 0 6px;
+  font-size: 16px;
+}
+.line-status-box p {
+  color: #64748b;
+  font-size: 13px;
+  margin: 0 0 14px;
+}
+.line-id-tag {
+  display: inline-block;
+  background: #e2e8f0;
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: 12px;
+  color: #334155;
+  margin-bottom: 12px;
+}
+.btn-danger-outline {
+  border: 1px solid #ef4444;
+  background: #fff;
+  color: #ef4444;
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.btn-danger-outline:hover {
+  background: #fef2f2;
+}
+.pin-card {
+  background: #fff;
+  border: 2px dashed #3b82f6;
+  border-radius: 12px;
+  padding: 20px;
+  margin: 16px 0;
+}
+.pin-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: #1e40af;
+}
+.pin-number {
+  font-size: 36px;
+  font-weight: 800;
+  letter-spacing: 8px;
+  color: #2563eb;
+  margin: 8px 0;
+  font-family: monospace;
+}
+.pin-expiry {
+  display: block;
+  color: #d97706;
+  font-size: 12px;
+  margin-bottom: 14px;
+}
+.pin-steps {
+  text-align: left;
+  background: #eff6ff;
+  border-radius: 8px;
+  padding: 12px 16px;
+  font-size: 12px;
+  color: #1e3a8a;
+}
+.pin-steps ol {
+  margin: 6px 0 0;
+  padding-left: 20px;
+}
+.pin-steps li {
+  margin-bottom: 4px;
 }
 </style>
