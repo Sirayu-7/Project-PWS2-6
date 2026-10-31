@@ -80,11 +80,38 @@
   DB_USER=root
   DB_PASSWORD=
   JWT_SECRET=it-equipment-project-change-this-secret
+
+  # LINE Messaging API Configuration
+  LINE_CHANNEL_ID=2012304828
+  LINE_CHANNEL_SECRET=90bf72df009f082ce57967292356e0f2
+  LINE_CHANNEL_ACCESS_TOKEN=your_channel_access_token_here
+  LINE_BOT_BASIC_ID=@yourbotid
+  LINE_STAFF_GROUP_ID=
   ```
 - **`frontend/.env`**
   ```env
   VITE_API_URL=http://localhost:3000/api
   ```
+
+---
+
+## 📱 การตั้งค่า LINE Messaging API & Webhook
+
+ระบบรองรับการเชื่อมต่อกับ **LINE Official Account (LINE Bot)** แบบ 2 ทาง (แจ้งเตือน + โต้ตอบ + อนุมัติ/ปฏิเสธคำขอ):
+
+1. **ตั้งค่า Webhook URL ใน LINE Developers Console:**
+   - ไปที่แท็บ **Messaging API**
+   - ในหัวข้อ **Webhook settings** ใส่ URL:
+     `https://<โดเมนของคุณ>/api/line/webhook`
+     *(สำหรับการทดสอบในเครื่อง Dev สามารถใช้โปรแกรมจำลอง เช่น ngrok / Cloudflare Tunnel เช่น `https://xxxx.ngrok-free.app/api/line/webhook`)*
+   - กดปุ่ม **Verify** และเปิดสวิตช์ **Use webhook** เป็น **ON**
+2. **การออก Channel Access Token:**
+   - ในแท็บ **Messaging API** เลื่อนลงมาที่หัวข้อ **Channel access token (long-lived)**
+   - กดปุ่ม **Issue** แล้วนำค่า Token มาใส่ใน `backend/.env` ที่ตัวแปร `LINE_CHANNEL_ACCESS_TOKEN`
+3. **การผูกบัญชีผู้ใช้ (Account Linking):**
+   - ผู้ใช้งานล็อกอินเข้าสู่ระบบผ่านเว็บ -> กดที่โปรไฟล์ที่มุมขวาบน หรือที่แถบเมนูด้านล่างซ้าย
+   - เลือกแท็บ **"การเชื่อมต่อ LINE"** แล้วกดปุ่ม **"ขอรหัสเชื่อมต่อ LINE (PIN)"**
+   - นำรหัส PIN 6 หลักที่ได้ไปส่งในแชทของ LINE Official Account ระบบจะทำการเชื่อมโยงบัญชีและเริ่มส่งการแจ้งเตือนทันที!
 
 ---
 
