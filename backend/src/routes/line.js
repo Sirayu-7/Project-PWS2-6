@@ -460,9 +460,9 @@ async function handleWebhookEvent(event) {
           return;
         }
 
-        const cards = pendingLoans.map(loan => lineService.buildLoanRequestCard(loan));
-        cards[cards.length - 1].quickReply = getRoleQuickReply(currentUser.role_name);
-        await lineService.replyMessage(event.replyToken, cards);
+        const carousel = lineService.buildPendingLoansCarousel(pendingLoans);
+        carousel.quickReply = getRoleQuickReply(currentUser.role_name);
+        await lineService.replyMessage(event.replyToken, carousel);
         return;
       }
 
@@ -494,19 +494,9 @@ async function handleWebhookEvent(event) {
           return;
         }
 
-        let reply = `🔧 รายการแจ้งซ่อมที่กำลังดำเนินการ (${tickets.length} รายการล่าสุด):`;
-        tickets.forEach((t, idx) => {
-          const statusText = t.status === 'In_Progress' ? 'กำลังซ่อม' : 'รอดำเนินการ';
-          const issue = t.problem_description || t.problem_type || '-';
-          reply += `\n\n${idx + 1}. #${t.maintenance_id} ${t.equipment_name} [${t.asset_code}]\n   อาการ: ${issue}\n   ผู้แจ้ง: ${t.reporter_name} (${statusText})`;
-        });
-        reply += '\n\nเข้าดูรายละเอียดและจัดการได้ที่หน้าเว็บครับ';
-
-        await lineService.replyMessage(event.replyToken, {
-          type: 'text',
-          text: reply,
-          quickReply: getRoleQuickReply(currentUser.role_name),
-        });
+        const carousel = lineService.buildMaintenanceTicketsCarousel(tickets);
+        carousel.quickReply = getRoleQuickReply(currentUser.role_name);
+        await lineService.replyMessage(event.replyToken, carousel);
         return;
       }
 
@@ -524,25 +514,13 @@ async function handleWebhookEvent(event) {
           JOIN categories c ON c.category_id = e.category_id
           WHERE e.status = 'Available'
           ORDER BY e.equipment_id DESC
-          LIMIT 5
+          LIMIT 6
         `);
 
         const total = counts[0].total || 0;
-        let reply = `📦 ขณะนี้มีอุปกรณ์พร้อมใช้งานทั้งหมด ${total} รายการ\n\nตัวอย่างอุปกรณ์ว่างล่าสุด:`;
-        if (items.length) {
-          items.forEach((it, idx) => {
-            reply += `\n${idx + 1}. ${it.equipment_name} (${it.category_name}) [${it.asset_code}]`;
-          });
-        } else {
-          reply += '\n(ไม่มีอุปกรณ์พร้อมใช้งานในขณะนี้)';
-        }
-        reply += '\n\nท่านสามารถเข้าสู่ระบบบนเว็บเพื่อส่งคำขอยืมได้ตลอด 24 ชั่วโมงครับ';
-
-        await lineService.replyMessage(event.replyToken, {
-          type: 'text',
-          text: reply,
-          quickReply: getRoleQuickReply(currentUser.role_name),
-        });
+        const card = lineService.buildAvailableEquipmentCard(total, items);
+        card.quickReply = getRoleQuickReply(currentUser.role_name);
+        await lineService.replyMessage(event.replyToken, card);
         return;
       }
 
@@ -554,18 +532,9 @@ async function handleWebhookEvent(event) {
         text.includes('ช่วยเหลือ') ||
         text.includes('เมนู')
       ) {
-        const isStaff = ['Administrator', 'Staff'].includes(currentUser.role_name);
-        let helpText = `🤖 เมนูระบบ IT Equipment Bot\nคุณ: ${currentUser.name} (${currentUser.role_name})\n\nคำสั่งที่สามารถแตะปุ่มลัดด้านล่างได้เลย:\n• 📋 รายการยืมของฉัน - ดูอุปกรณ์ที่คุณกำลังยืม\n• 📦 อุปกรณ์ว่าง - ตรวจสอบสต็อกอุปกรณ์พร้อมใช้`;
-        if (isStaff) {
-          helpText += `\n• ⏳ คำขอรออนุมัติ - ดูคำขอและกดอนุมัติ/ปฏิเสธ\n• 🔧 รายการแจ้งซ่อม - ตรวจสอบรายการซ่อมที่ค้างอยู่`;
-        }
-        helpText += `\n\nเข้าใช้งานเว็บไซต์: http://localhost:5173`;
-
-        await lineService.replyMessage(event.replyToken, {
-          type: 'text',
-          text: helpText,
-          quickReply: getRoleQuickReply(currentUser.role_name),
-        });
+        const card = lineService.buildHelpCard(currentUser);
+        card.quickReply = getRoleQuickReply(currentUser.role_name);
+        await lineService.replyMessage(event.replyToken, card);
         return;
       }
 

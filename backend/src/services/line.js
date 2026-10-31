@@ -432,6 +432,411 @@ function buildUserLoansCarousel(loans) {
   };
 }
 
+function buildPendingLoansCarousel(loans) {
+  if (!loans || !loans.length) {
+    return {
+      type: 'text',
+      text: '🎉 ขณะนี้ไม่มีคำขอยืมอุปกรณ์ที่รอการอนุมัติครับ',
+    };
+  }
+
+  const bubbles = loans.slice(0, 10).map((l) => {
+    return {
+      type: 'bubble',
+      size: 'kilo',
+      header: {
+        type: 'box',
+        layout: 'vertical',
+        backgroundColor: '#1e3a8a',
+        paddingAll: '14px',
+        contents: [
+          {
+            type: 'box',
+            layout: 'horizontal',
+            contents: [
+              { type: 'text', text: '⏳ รออนุมัติ', size: 'xxs', weight: 'bold', color: '#fef08a' },
+              { type: 'text', text: `#${l.loan_id}`, size: 'xxs', color: '#93c5fd', align: 'end' },
+            ],
+          },
+          {
+            type: 'text',
+            text: l.equipment_name || 'อุปกรณ์',
+            weight: 'bold',
+            color: '#ffffff',
+            size: 'sm',
+            wrap: true,
+            margin: 'xs',
+          },
+          {
+            type: 'text',
+            text: l.asset_code || '-',
+            color: '#cbd5e1',
+            size: 'xxs',
+          },
+        ],
+      },
+      body: {
+        type: 'box',
+        layout: 'vertical',
+        spacing: 'xs',
+        paddingAll: '12px',
+        contents: [
+          {
+            type: 'box',
+            layout: 'horizontal',
+            contents: [
+              { type: 'text', text: 'ผู้ขอยืม:', size: 'xxs', color: '#64748b', flex: 2 },
+              { type: 'text', text: l.borrower_name || '-', size: 'xxs', weight: 'bold', flex: 3 },
+            ],
+          },
+          {
+            type: 'box',
+            layout: 'horizontal',
+            contents: [
+              { type: 'text', text: 'กำหนดคืน:', size: 'xxs', color: '#64748b', flex: 2 },
+              { type: 'text', text: l.due_date ? String(l.due_date).slice(0, 10) : '-', size: 'xxs', weight: 'bold', color: '#2563eb', flex: 3 },
+            ],
+          },
+          {
+            type: 'box',
+            layout: 'vertical',
+            margin: 'sm',
+            paddingAll: '8px',
+            backgroundColor: '#f8fafc',
+            cornerRadius: '6px',
+            contents: [
+              { type: 'text', text: 'วัตถุประสงค์:', size: 'xxs', color: '#64748b' },
+              { type: 'text', text: l.purpose || 'ไม่ระบุ', size: 'xxs', color: '#334155', wrap: true, margin: 'xs' },
+            ],
+          },
+        ],
+      },
+      footer: {
+        type: 'box',
+        layout: 'horizontal',
+        spacing: 'sm',
+        paddingAll: '10px',
+        contents: [
+          {
+            type: 'button',
+            style: 'primary',
+            color: '#16a34a',
+            height: 'sm',
+            action: {
+              type: 'postback',
+              label: 'อนุมัติ',
+              data: `action=approve_loan&loan_id=${l.loan_id}`,
+              displayText: `อนุมัติคำขอยืม #${l.loan_id}`,
+            },
+          },
+          {
+            type: 'button',
+            style: 'primary',
+            color: '#dc2626',
+            height: 'sm',
+            action: {
+              type: 'postback',
+              label: 'ปฏิเสธ',
+              data: `action=reject_loan_init&loan_id=${l.loan_id}`,
+              displayText: `ปฏิเสธคำขอยืม #${l.loan_id}`,
+            },
+          },
+        ],
+      },
+    };
+  });
+
+  return {
+    type: 'flex',
+    altText: `⏳ คำขอยืมรออนุมัติ (${loans.length} รายการ)`,
+    contents: {
+      type: 'carousel',
+      contents: bubbles,
+    },
+  };
+}
+
+function buildMaintenanceTicketsCarousel(tickets) {
+  if (!tickets || !tickets.length) {
+    return {
+      type: 'text',
+      text: '✅ ขณะนี้ไม่มีรายการแจ้งซ่อมที่ค้างอยู่ครับ',
+    };
+  }
+
+  const bubbles = tickets.slice(0, 10).map((t) => {
+    const isProgress = t.status === 'In_Progress';
+    const statusBg = isProgress ? '#3b82f6' : '#f59e0b';
+    const statusLabel = isProgress ? 'กำลังดำเนินการซ่อม' : 'รอการซ่อมบำรุง';
+
+    return {
+      type: 'bubble',
+      size: 'kilo',
+      header: {
+        type: 'box',
+        layout: 'vertical',
+        backgroundColor: '#0f172a',
+        paddingAll: '14px',
+        contents: [
+          {
+            type: 'box',
+            layout: 'horizontal',
+            contents: [
+              {
+                type: 'box',
+                layout: 'horizontal',
+                contents: [{ type: 'text', text: statusLabel, size: 'xxs', weight: 'bold', color: '#ffffff' }],
+                backgroundColor: statusBg,
+                paddingStart: '8px',
+                paddingEnd: '8px',
+                paddingTop: '2px',
+                paddingBottom: '2px',
+                cornerRadius: '4px',
+              },
+              { type: 'text', text: `#${t.maintenance_id}`, size: 'xxs', color: '#94a3b8', align: 'end' },
+            ],
+          },
+          {
+            type: 'text',
+            text: t.equipment_name || 'อุปกรณ์',
+            weight: 'bold',
+            color: '#ffffff',
+            size: 'sm',
+            wrap: true,
+            margin: 'sm',
+          },
+          {
+            type: 'text',
+            text: t.asset_code || '-',
+            color: '#94a3b8',
+            size: 'xxs',
+          },
+        ],
+      },
+      body: {
+        type: 'box',
+        layout: 'vertical',
+        spacing: 'xs',
+        paddingAll: '12px',
+        contents: [
+          {
+            type: 'box',
+            layout: 'horizontal',
+            contents: [
+              { type: 'text', text: 'ประเภทอาการ:', size: 'xxs', color: '#64748b', flex: 2 },
+              { type: 'text', text: t.problem_type || '-', size: 'xxs', weight: 'bold', color: '#dc2626', flex: 3 },
+            ],
+          },
+          {
+            type: 'box',
+            layout: 'horizontal',
+            contents: [
+              { type: 'text', text: 'ผู้แจ้งซ่อม:', size: 'xxs', color: '#64748b', flex: 2 },
+              { type: 'text', text: t.reporter_name || '-', size: 'xxs', weight: 'bold', flex: 3 },
+            ],
+          },
+          {
+            type: 'box',
+            layout: 'horizontal',
+            contents: [
+              { type: 'text', text: 'วันที่แจ้ง:', size: 'xxs', color: '#64748b', flex: 2 },
+              { type: 'text', text: t.reported_at ? String(t.reported_at).slice(0, 10) : '-', size: 'xxs', flex: 3 },
+            ],
+          },
+          {
+            type: 'box',
+            layout: 'vertical',
+            margin: 'sm',
+            paddingAll: '8px',
+            backgroundColor: '#f8fafc',
+            cornerRadius: '6px',
+            contents: [
+              { type: 'text', text: 'รายละเอียด:', size: 'xxs', color: '#64748b' },
+              { type: 'text', text: t.problem_description || '-', size: 'xxs', color: '#334155', wrap: true, margin: 'xs' },
+            ],
+          },
+        ],
+      },
+    };
+  });
+
+  return {
+    type: 'flex',
+    altText: `🔧 รายการแจ้งซ่อมที่ค้างอยู่ (${tickets.length} รายการ)`,
+    contents: {
+      type: 'carousel',
+      contents: bubbles,
+    },
+  };
+}
+
+function buildAvailableEquipmentCard(total, items) {
+  const itemRows = (items || []).map((it, idx) => {
+    return {
+      type: 'box',
+      layout: 'vertical',
+      spacing: 'xs',
+      contents: [
+        {
+          type: 'box',
+          layout: 'horizontal',
+          contents: [
+            {
+              type: 'box',
+              layout: 'horizontal',
+              backgroundColor: '#e0f2fe',
+              cornerRadius: '4px',
+              paddingStart: '6px',
+              paddingEnd: '6px',
+              paddingTop: '1px',
+              paddingBottom: '1px',
+              contents: [{ type: 'text', text: it.category_name || 'ทั่วไป', size: 'xxs', color: '#0369a1', weight: 'bold' }],
+            },
+            { type: 'text', text: it.asset_code || '-', size: 'xxs', color: '#94a3b8', align: 'end' },
+          ],
+        },
+        {
+          type: 'text',
+          text: `${idx + 1}. ${it.equipment_name}`,
+          weight: 'bold',
+          size: 'xs',
+          color: '#1e293b',
+          wrap: true,
+        },
+      ],
+    };
+  });
+
+  const bodyContents = [];
+  itemRows.forEach((row, i) => {
+    if (i > 0) {
+      bodyContents.push({ type: 'separator', margin: 'md', color: '#f1f5f9' });
+    }
+    bodyContents.push({ type: 'box', layout: 'vertical', margin: i > 0 ? 'md' : 'none', contents: [row] });
+  });
+
+  if (total > items.length) {
+    bodyContents.push({
+      type: 'text',
+      text: `... และอีก ${total - items.length} รายการที่พร้อมใช้งาน`,
+      size: 'xxs',
+      color: '#64748b',
+      align: 'center',
+      margin: 'lg',
+    });
+  }
+
+  return {
+    type: 'flex',
+    altText: `📦 มีอุปกรณ์พร้อมใช้งาน ${total} รายการ`,
+    contents: {
+      type: 'bubble',
+      header: {
+        type: 'box',
+        layout: 'vertical',
+        backgroundColor: '#059669',
+        paddingAll: '16px',
+        contents: [
+          { type: 'text', text: '📦 อุปกรณ์พร้อมใช้งาน', weight: 'bold', color: '#ffffff', size: 'md' },
+          { type: 'text', text: `มีอุปกรณ์ว่างทั้งหมด ${total} รายการในระบบ`, color: '#d1fae5', size: 'xs', margin: 'xs' },
+        ],
+      },
+      body: {
+        type: 'box',
+        layout: 'vertical',
+        paddingAll: '16px',
+        contents: bodyContents.length ? bodyContents : [
+          { type: 'text', text: 'ไม่มีอุปกรณ์พร้อมใช้งานในขณะนี้', size: 'xs', color: '#64748b', align: 'center' }
+        ],
+      },
+    },
+  };
+}
+
+function buildHelpCard(user) {
+  const isStaff = ['Administrator', 'Staff'].includes(user.role_name);
+
+  const guideRows = [
+    {
+      icon: '📋',
+      title: 'รายการยืมของฉัน',
+      desc: 'ดูรายการอุปกรณ์ที่คุณกำลังยืม พร้อมวันครบกำหนดคืน',
+    },
+    {
+      icon: '📦',
+      title: 'อุปกรณ์ว่าง',
+      desc: 'ตรวจเช็คสต็อกอุปกรณ์ไอทีที่พร้อมเปิดให้ยืมในปัจจุบัน',
+    },
+  ];
+
+  if (isStaff) {
+    guideRows.push({
+      icon: '⏳',
+      title: 'คำขอรออนุมัติ (เจ้าหน้าที่)',
+      desc: 'ตรวจสอบคำขอยืมใหม่ และกดอนุมัติหรือปฏิเสธผ่านแชทได้ทันที',
+    });
+    guideRows.push({
+      icon: '🔧',
+      title: 'รายการแจ้งซ่อม (เจ้าหน้าที่)',
+      desc: 'ติดตามงานซ่อมบำรุงอุปกรณ์ที่กำลังดำเนินการ',
+    });
+  }
+
+  const bodyContents = guideRows.map((r, i) => {
+    return {
+      type: 'box',
+      layout: 'horizontal',
+      spacing: 'md',
+      margin: i > 0 ? 'md' : 'none',
+      contents: [
+        { type: 'text', text: r.icon, size: 'xl', flex: 1 },
+        {
+          type: 'box',
+          layout: 'vertical',
+          flex: 6,
+          contents: [
+            { type: 'text', text: r.title, weight: 'bold', size: 'xs', color: '#1e293b' },
+            { type: 'text', text: r.desc, size: 'xxs', color: '#64748b', wrap: true, margin: 'xs' },
+          ],
+        },
+      ],
+    };
+  });
+
+  return {
+    type: 'flex',
+    altText: '🤖 คู่มือการใช้งานระบบ IT Equipment Bot',
+    contents: {
+      type: 'bubble',
+      header: {
+        type: 'box',
+        layout: 'vertical',
+        backgroundColor: '#4338ca',
+        paddingAll: '16px',
+        contents: [
+          { type: 'text', text: '🤖 IT Equipment Bot', weight: 'bold', color: '#ffffff', size: 'md' },
+          { type: 'text', text: `คุณ: ${user.name} (${user.role_name})`, color: '#c7d2fe', size: 'xs', margin: 'xs' },
+        ],
+      },
+      body: {
+        type: 'box',
+        layout: 'vertical',
+        paddingAll: '16px',
+        contents: [
+          { type: 'text', text: 'คำสั่งที่คุณสามารถแตะเลือกใช้งาน:', size: 'xs', weight: 'bold', color: '#475569', margin: 'none' },
+          { type: 'separator', margin: 'md', color: '#e2e8f0' },
+          {
+            type: 'box',
+            layout: 'vertical',
+            margin: 'md',
+            contents: bodyContents,
+          },
+        ],
+      },
+    },
+  };
+}
+
 async function notifyNewLoanRequest(loanId) {
   try {
     const [rows] = await pool.execute(`
@@ -495,6 +900,10 @@ module.exports = {
   buildOverdueCard,
   buildMaintenanceCard,
   buildUserLoansCarousel,
+  buildPendingLoansCarousel,
+  buildMaintenanceTicketsCarousel,
+  buildAvailableEquipmentCard,
+  buildHelpCard,
   notifyNewLoanRequest,
   notifyLoanDecision,
   notifyMaintenanceTicket,
