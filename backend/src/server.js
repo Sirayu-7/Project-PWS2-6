@@ -14,6 +14,7 @@ const notificationRoutes = require('./routes/notifications');
 const auditRoutes = require('./routes/audit');
 const realtimeRoutes = require('./routes/realtime');
 const lineRoutes = require('./routes/line');
+const { startCron } = require('./services/cron');
 
 const { emitToAll } = require('./services/realtime');
 
@@ -51,7 +52,10 @@ app.use('/api/line', lineRoutes);
 app.use((req, res) => res.status(404).json({ success: false, message: 'API endpoint not found' }));
 
 if (require.main === module) {
-  app.listen(PORT, () => console.log(`IT Equipment API running on http://localhost:${PORT}`));
+  app.listen(PORT, () => {
+    console.log(`IT Equipment API running on http://localhost:${PORT}`);
+    startCron();
+  });
 }
 
 module.exports = app;

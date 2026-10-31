@@ -4,6 +4,7 @@ const { authenticateToken, requirePermission } = require('../middleware/auth');
 const { PERMISSIONS } = require('../config/permissions');
 const { writeAudit } = require('../services/audit');
 const { createNotification, notifyRoles } = require('../services/notification');
+const lineService = require('../services/line');
 
 const router = express.Router();
 router.use(authenticateToken);
@@ -108,13 +109,14 @@ router.post('/', requirePermission(PERMISSIONS.LOAN_CREATE), async (req, res) =>
 
     await c.commit();
     await auditSafe({ userId: req.user.id, action: 'CREATE_LOAN', tableName: 'loans', recordId: r.insertId });
-    await notifySafe(() =>
-      notifyRoles({
+    await notifySafe(async () => {
+      await notifyRoles({
         roles: ['Administrator', 'Staff'],
         title: 'มีคำขอยืมอุปกรณ์ใหม่',
         message: `มีคำขอยืมรายการ #${r.insertId} รอการอนุมัติ`,
-      })
-    );
+      });
+      await lineService.notifyNewLoanRequest(r.insertId);
+    });
 
     res.status(201).json({ success: true, message: 'ส่งคำขอยืมสำเร็จ', loan_id: r.insertId });
   } catch (e) {
@@ -161,13 +163,14 @@ router.put('/:id/approve', requirePermission(PERMISSIONS.LOAN_APPROVE), async (r
     await c.commit();
 
     await auditSafe({ userId: req.user.id, action: 'APPROVE_LOAN', tableName: 'loans', recordId: req.params.id });
-    await notifySafe(() =>
-      createNotification({
+    await notifySafe(async () => {
+      await createNotification({
         userId: l.borrower_id,
         title: 'คำขอยืมได้รับการอนุมัติ',
         message: `คำขอยืมรายการ #${req.params.id} ได้รับการอนุมัติและอยู่ในสถานะกำลังยืม`,
-      })
-    );
+      });
+      await lineService.notifyLoanDecision(req.params.id, true, req.user.name || 'เจ้าหน้าที่ IT');
+    });
 
     res.json({ success: true, message: 'อนุมัติการยืมสำเร็จ' });
   } catch (e) {
@@ -196,13 +199,14 @@ router.put('/:id/reject', requirePermission(PERMISSIONS.LOAN_REJECT), async (req
     }
 
     await auditSafe({ userId: req.user.id, action: 'REJECT_LOAN', tableName: 'loans', recordId: req.params.id });
-    await notifySafe(() =>
-      createNotification({
+    await notifySafe(async () => {
+      await createNotification({
         userId: rows[0].borrower_id,
         title: 'คำขอยืมถูกปฏิเสธ',
         message: `คำขอยืมรายการ #${req.params.id} ถูกปฏิเสธ${req.body?.remark ? ` — ${req.body.remark}` : ''}`,
-      })
-    );
+      });
+      await lineService.notifyLoanDecision(req.params.id, false, req.user.name || 'เจ้าหน้าที่ IT', req.body?.remark);
+    });
 
     res.json({ success: true, message: 'ปฏิเสธคำขอยืมแล้ว' });
   } catch (e) {

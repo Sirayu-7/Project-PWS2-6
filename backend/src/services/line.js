@@ -352,7 +352,7 @@ function buildMaintenanceCard(ticket) {
             layout: 'horizontal',
             contents: [
               { type: 'text', text: 'อาการเสีย:', size: 'xs', color: '#64748b', flex: 2 },
-              { type: 'text', text: `${ticket.issue_description || '-'}`, size: 'xs', flex: 4, wrap: true },
+              { type: 'text', text: `${ticket.problem_description || ticket.issue_description || '-'}`, size: 'xs', flex: 4, wrap: true },
             ],
           },
           {
@@ -432,6 +432,60 @@ function buildUserLoansCarousel(loans) {
   };
 }
 
+async function notifyNewLoanRequest(loanId) {
+  try {
+    const [rows] = await pool.execute(`
+      SELECT l.*, e.equipment_name, e.asset_code, u.name AS borrower_name
+      FROM loans l
+      JOIN equipment e ON e.equipment_id = l.equipment_id
+      JOIN users u ON u.user_id = l.borrower_id
+      WHERE l.loan_id = ?
+    `, [loanId]);
+    if (!rows.length) return null;
+    const card = buildLoanRequestCard(rows[0]);
+    return await sendToStaffChannel(card);
+  } catch (e) {
+    console.error('[LINE_NOTIFY_LOAN_ERROR]:', e.message);
+    return null;
+  }
+}
+
+async function notifyLoanDecision(loanId, isApproved, approverName, remark) {
+  try {
+    const [rows] = await pool.execute(`
+      SELECT l.*, e.equipment_name, b.line_user_id AS borrower_line_id
+      FROM loans l
+      JOIN equipment e ON e.equipment_id = l.equipment_id
+      JOIN users b ON b.user_id = l.borrower_id
+      WHERE l.loan_id = ?
+    `, [loanId]);
+    if (!rows.length || !rows[0].borrower_line_id) return null;
+    const card = buildLoanDecisionCard(rows[0], isApproved, approverName, remark);
+    return await sendPush(rows[0].borrower_line_id, card);
+  } catch (e) {
+    console.error('[LINE_NOTIFY_DECISION_ERROR]:', e.message);
+    return null;
+  }
+}
+
+async function notifyMaintenanceTicket(maintenanceId) {
+  try {
+    const [rows] = await pool.execute(`
+      SELECT m.*, e.equipment_name, e.asset_code, u.name AS reporter_name
+      FROM maintenance m
+      JOIN equipment e ON e.equipment_id = m.equipment_id
+      JOIN users u ON u.user_id = m.reported_by
+      WHERE m.maintenance_id = ?
+    `, [maintenanceId]);
+    if (!rows.length) return null;
+    const card = buildMaintenanceCard(rows[0]);
+    return await sendToStaffChannel(card);
+  } catch (e) {
+    console.error('[LINE_NOTIFY_MAINT_ERROR]:', e.message);
+    return null;
+  }
+}
+
 module.exports = {
   sendPush,
   replyMessage,
@@ -441,4 +495,7 @@ module.exports = {
   buildOverdueCard,
   buildMaintenanceCard,
   buildUserLoansCarousel,
+  notifyNewLoanRequest,
+  notifyLoanDecision,
+  notifyMaintenanceTicket,
 };

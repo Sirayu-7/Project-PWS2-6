@@ -4,6 +4,7 @@ const { authenticateToken, requirePermission } = require('../middleware/auth');
 const { PERMISSIONS } = require('../config/permissions');
 const { writeAudit } = require('../services/audit');
 const { createNotification, notifyRoles } = require('../services/notification');
+const lineService = require('../services/line');
 
 const router = express.Router();
 router.use(authenticateToken);
@@ -121,13 +122,14 @@ router.post('/', requirePermission(PERMISSIONS.MAINTENANCE_CREATE), async (req, 
     );
 
     await auditSafe({ userId: req.user.id, action: 'CREATE_MAINTENANCE', tableName: 'maintenance', recordId: r.insertId });
-    await notifySafe(() =>
-      notifyRoles({
+    await notifySafe(async () => {
+      await notifyRoles({
         roles: ['Administrator', 'Staff'],
         title: 'มีรายการแจ้งซ่อมใหม่',
         message: `มีรายการแจ้งซ่อม #${r.insertId} (${problem_type}) รอตรวจสอบ`,
-      })
-    );
+      });
+      await lineService.notifyMaintenanceTicket(r.insertId);
+    });
 
     res.status(201).json({ success: true, message: 'แจ้งซ่อมสำเร็จ', maintenance_id: r.insertId });
   } catch (e) {
