@@ -106,6 +106,23 @@ router.post('/webhook', verifyLineSignature, async (req, res) => {
   res.status(200).json({ success: true });
 });
 
+function getRoleQuickReply(roleName) {
+  const isStaff = ['Administrator', 'Staff'].includes(roleName);
+  const items = [
+    { type: 'action', action: { type: 'message', label: '📋 รายการยืมของฉัน', text: 'รายการยืมของฉัน' } },
+    { type: 'action', action: { type: 'message', label: '📦 อุปกรณ์ว่าง', text: 'อุปกรณ์ว่าง' } },
+  ];
+
+  if (isStaff) {
+    items.push({ type: 'action', action: { type: 'message', label: '⏳ คำขอรออนุมัติ', text: 'คำขอรออนุมัติ' } });
+    items.push({ type: 'action', action: { type: 'message', label: '🔧 รายการแจ้งซ่อม', text: 'รายการแจ้งซ่อม' } });
+  }
+
+  items.push({ type: 'action', action: { type: 'message', label: '❓ ช่วยเหลือ', text: 'ช่วยเหลือ' } });
+
+  return { items };
+}
+
 async function handleWebhookEvent(event) {
   const lineUserId = event.source?.userId;
   if (!lineUserId) return;
@@ -250,7 +267,15 @@ async function handleWebhookEvent(event) {
 
       await lineService.replyMessage(event.replyToken, {
         type: 'text',
-        text: `📝 กรุณาพิมพ์ระบุเหตุผลการไม่อนุมัติคำขอยืม #${loanId} ส่งกลับมาในแชทนี้ (หรือพิมพ์ "ยกเลิก" เพื่อย้อนกลับ)`,
+        text: `📝 กรุณาพิมพ์ระบุเหตุผลการไม่อนุมัติคำขอยืม #${loanId} ส่งกลับมาในแชทนี้ (หรือแตะเลือกเหตุผลด่วนด้านล่าง):`,
+        quickReply: {
+          items: [
+            { type: 'action', action: { type: 'message', label: '🛠️ อุปกรณ์ชำรุด/ส่งซ่อม', text: 'อุปกรณ์ชำรุด/ต้องส่งซ่อม' } },
+            { type: 'action', action: { type: 'message', label: '📦 ติดจองใช้งานส่วนกลาง', text: 'อุปกรณ์ติดจองใช้งานส่วนกลาง' } },
+            { type: 'action', action: { type: 'message', label: '⚠️ ข้อมูลผู้ยืมไม่ครบ', text: 'ข้อมูลหรือเหตุผลการยืมไม่ครบถ้วน' } },
+            { type: 'action', action: { type: 'message', label: '❌ ยกเลิก', text: 'ยกเลิก' } },
+          ],
+        },
       });
       return;
     }
@@ -292,7 +317,8 @@ async function handleWebhookEvent(event) {
 
       await lineService.replyMessage(event.replyToken, {
         type: 'text',
-        text: `✅ เชื่อมต่อบัญชีสำเร็จ!\nคุณ: ${match.name}\nสิทธิ์: ${match.role_name}\n\nคุณจะได้รับการแจ้งเตือนและการทำรายการผ่าน LINE ตั้งแต่นี้เป็นต้นไปครับ`,
+        text: `✅ เชื่อมต่อบัญชีสำเร็จ!\nคุณ: ${match.name}\nสิทธิ์: ${match.role_name}\n\nคุณจะได้รับการแจ้งเตือนและการทำรายการผ่าน LINE ตั้งแต่นี้เป็นต้นไปครับ แตะปุ่มลัดด้านล่างเพื่อเริ่มใช้งานได้เลย`,
+        quickReply: getRoleQuickReply(match.role_name),
       });
       return;
     }
@@ -314,6 +340,7 @@ async function handleWebhookEvent(event) {
           await lineService.replyMessage(event.replyToken, {
             type: 'text',
             text: `ยกเลิกการปฏิเสธคำขอยืม #${loanId} เรียบร้อยแล้ว รายการยังคงอยู่ในสถานะรออนุมัติ`,
+            quickReply: getRoleQuickReply(currentUser.role_name),
           });
           return;
         }
@@ -339,6 +366,7 @@ async function handleWebhookEvent(event) {
             await lineService.replyMessage(event.replyToken, {
               type: 'text',
               text: `ℹ️ คำขอยืม #${loanId} ได้รับการดำเนินการไปแล้ว`,
+              quickReply: getRoleQuickReply(currentUser.role_name),
             });
             return;
           }
@@ -351,6 +379,7 @@ async function handleWebhookEvent(event) {
           await lineService.replyMessage(event.replyToken, {
             type: 'text',
             text: `✅ ปฏิเสธคำขอยืม #${loanId} เรียบร้อยแล้ว\nเหตุผล: ${text}\nระบบได้แจ้งผลไปยังผู้ยืมแล้วครับ`,
+            quickReply: getRoleQuickReply(currentUser.role_name),
           });
 
           // Push notice to borrower
@@ -367,6 +396,7 @@ async function handleWebhookEvent(event) {
           await lineService.replyMessage(event.replyToken, {
             type: 'text',
             text: `ℹ️ คำขอยืม #${loanId} ไม่อยู่ในสถานะรออนุมัติแล้ว`,
+            quickReply: getRoleQuickReply(currentUser.role_name),
           });
         }
         return;
@@ -382,7 +412,81 @@ async function handleWebhookEvent(event) {
           ORDER BY l.loan_id DESC
         `, [currentUser.user_id]);
 
-        await lineService.replyMessage(event.replyToken, lineService.buildUserLoansCarousel(myLoans));
+        const cardOrMsg = lineService.buildUserLoansCarousel(myLoans);
+        cardOrMsg.quickReply = getRoleQuickReply(currentUser.role_name);
+        await lineService.replyMessage(event.replyToken, cardOrMsg);
+        return;
+      }
+
+      // Keyword: คำขอรออนุมัติ (สำหรับ Staff/Admin)
+      if (text === 'คำขอรออนุมัติ' || text === 'รออนุมัติ' || text === 'อนุมัติคำขอ') {
+        if (!['Administrator', 'Staff'].includes(currentUser.role_name)) {
+          await lineService.replyMessage(event.replyToken, {
+            type: 'text',
+            text: '⛔ ขออภัย คำสั่งนี้สำหรับเจ้าหน้าที่ดูแลอุปกรณ์เท่านั้นครับ',
+            quickReply: getRoleQuickReply(currentUser.role_name),
+          });
+          return;
+        }
+
+        const [pendingLoans] = await pool.execute(`
+          SELECT l.*, e.equipment_name, e.asset_code, u.name AS borrower_name, u.department
+          FROM loans l
+          JOIN equipment e ON e.equipment_id = l.equipment_id
+          JOIN users u ON u.user_id = l.borrower_id
+          WHERE l.status = 'Pending'
+          ORDER BY l.loan_id DESC
+          LIMIT 5
+        `);
+
+        if (!pendingLoans.length) {
+          await lineService.replyMessage(event.replyToken, {
+            type: 'text',
+            text: '🎉 ขณะนี้ไม่มีคำขอยืมอุปกรณ์ที่รออนุมัติครับ',
+            quickReply: getRoleQuickReply(currentUser.role_name),
+          });
+          return;
+        }
+
+        const cards = pendingLoans.map(loan => lineService.buildLoanRequestCard(loan));
+        cards[cards.length - 1].quickReply = getRoleQuickReply(currentUser.role_name);
+        await lineService.replyMessage(event.replyToken, cards);
+        return;
+      }
+
+      // Keyword: รายการแจ้งซ่อม (สำหรับ Staff/Admin)
+      if (text === 'รายการแจ้งซ่อม' || text === 'งานซ่อม' || text === 'แจ้งซ่อม') {
+        const [tickets] = await pool.execute(`
+          SELECT m.*, e.equipment_name, e.asset_code, u.name AS reporter_name
+          FROM maintenance m
+          JOIN equipment e ON e.equipment_id = m.equipment_id
+          JOIN users u ON u.user_id = m.reporter_id
+          WHERE m.status IN ('Reported', 'In_Progress')
+          ORDER BY m.ticket_id DESC
+          LIMIT 5
+        `);
+
+        if (!tickets.length) {
+          await lineService.replyMessage(event.replyToken, {
+            type: 'text',
+            text: '✅ ขณะนี้ไม่มีรายการแจ้งซ่อมที่ค้างอยู่ครับ',
+            quickReply: getRoleQuickReply(currentUser.role_name),
+          });
+          return;
+        }
+
+        let reply = `🔧 รายการแจ้งซ่อมที่กำลังดำเนินการ (${tickets.length} รายการล่าสุด):`;
+        tickets.forEach((t, idx) => {
+          const statusText = t.status === 'In_Progress' ? 'กำลังซ่อม' : 'รอดำเนินการ';
+          reply += `\n\n${idx + 1}. #${t.ticket_id} ${t.equipment_name} [${t.asset_code}]\n   อาการ: ${t.issue_description || '-'}\n   ผู้แจ้ง: ${t.reporter_name} (${statusText})`;
+        });
+        reply += '\n\nเข้าดูรายละเอียดและจัดการได้ที่หน้าเว็บครับ';
+
+        await lineService.replyMessage(event.replyToken, {
+          type: 'text',
+          text: reply,
+          quickReply: getRoleQuickReply(currentUser.role_name),
+        });
         return;
       }
 
@@ -409,37 +513,39 @@ async function handleWebhookEvent(event) {
         }
         reply += '\n\nท่านสามารถเข้าสู่ระบบบนเว็บเพื่อส่งคำขอยืมได้ตลอด 24 ชั่วโมงครับ';
 
-        await lineService.replyMessage(event.replyToken, { type: 'text', text: reply });
+        await lineService.replyMessage(event.replyToken, {
+          type: 'text',
+          text: reply,
+          quickReply: getRoleQuickReply(currentUser.role_name),
+        });
         return;
       }
 
       // Keyword: ช่วยเหลือ / เมนู
       if (text === 'ช่วยเหลือ' || text === 'เมนู' || text.toLowerCase() === 'help') {
+        const isStaff = ['Administrator', 'Staff'].includes(currentUser.role_name);
+        let helpText = `🤖 เมนูระบบ IT Equipment Bot\nคุณ: ${currentUser.name} (${currentUser.role_name})\n\nคำสั่งที่สามารถแตะปุ่มลัดด้านล่างได้เลย:\n• 📋 รายการยืมของฉัน - ดูอุปกรณ์ที่คุณกำลังยืม\n• 📦 อุปกรณ์ว่าง - ตรวจสอบสต็อกอุปกรณ์พร้อมใช้`;
+        if (isStaff) {
+          helpText += `\n• ⏳ คำขอรออนุมัติ - ดูคำขอและกดอนุมัติ/ปฏิเสธ\n• 🔧 รายการแจ้งซ่อม - ตรวจสอบรายการซ่อมที่ค้างอยู่`;
+        }
+        helpText += `\n\nเข้าใช้งานเว็บไซต์: http://localhost:5173`;
+
         await lineService.replyMessage(event.replyToken, {
           type: 'text',
-          text: `🤖 เมนูการใช้งานระบบ IT Equipment Bot:\n\n1. พิมพ์ "รายการยืมของฉัน" เพื่อดูอุปกรณ์ที่คุณกำลังยืม\n2. พิมพ์ "อุปกรณ์ว่าง" เพื่อตรวจสอบอุปกรณ์ที่พร้อมให้ยืม\n3. สำหรับเจ้าหน้าที่ เมื่อมีคำขอยืมใหม่ ระบบจะส่งการ์ดเพื่อให้กดอนุมัติหรือปฏิเสธได้ทันที\n\nเข้าใช้งานเว็บไซต์: http://localhost:5173`,
-          quickReply: {
-            items: [
-              { type: 'action', action: { type: 'message', label: '📋 รายการยืมของฉัน', text: 'รายการยืมของฉัน' } },
-              { type: 'action', action: { type: 'message', label: '📦 อุปกรณ์ว่าง', text: 'อุปกรณ์ว่าง' } },
-              { type: 'action', action: { type: 'message', label: '❓ ช่วยเหลือ', text: 'ช่วยเหลือ' } },
-            ],
-          },
+          text: helpText,
+          quickReply: getRoleQuickReply(currentUser.role_name),
         });
         return;
       }
 
       // Default reply for linked user if message not recognized
+      const isStaff = ['Administrator', 'Staff'].includes(currentUser.role_name);
+      let desc = `🤖 คุณ: ${currentUser.name} (${currentUser.role_name})\n\nแตะเลือกเมนูลัด (Quick Reply) ด้านล่างเพื่อสั่งการบอทได้เลยครับ:`;
+
       await lineService.replyMessage(event.replyToken, {
         type: 'text',
-        text: `🤖 คุณ: ${currentUser.name} (${currentUser.role_name})\n\nคำสั่งที่สามารถใช้งานได้:\n• พิมพ์ "รายการยืมของฉัน" เพื่อดูรายการที่คุณยืม\n• พิมพ์ "อุปกรณ์ว่าง" เพื่อดูอุปกรณ์ที่พร้อมใช้งาน\n• พิมพ์ "ช่วยเหลือ" เพื่อดูวิธีใช้งาน`,
-        quickReply: {
-          items: [
-            { type: 'action', action: { type: 'message', label: '📋 รายการยืมของฉัน', text: 'รายการยืมของฉัน' } },
-            { type: 'action', action: { type: 'message', label: '📦 อุปกรณ์ว่าง', text: 'อุปกรณ์ว่าง' } },
-            { type: 'action', action: { type: 'message', label: '❓ ช่วยเหลือ', text: 'ช่วยเหลือ' } },
-          ],
-        },
+        text: desc,
+        quickReply: getRoleQuickReply(currentUser.role_name),
       });
       return;
     } else {
@@ -447,6 +553,12 @@ async function handleWebhookEvent(event) {
       await lineService.replyMessage(event.replyToken, {
         type: 'text',
         text: '👋 สวัสดีครับ บัญชี LINE ของคุณยังไม่ได้เชื่อมต่อกับระบบ IT Equipment\n\n📌 วิธีเชื่อมต่อ:\n1. เข้าสู่ระบบผ่านหน้าเว็บ\n2. กดที่โปรไฟล์ -> เลือกแท็บ "การเชื่อมต่อ LINE"\n3. กดปุ่ม "ขอรหัสเชื่อมต่อ LINE (PIN)"\n4. นำรหัส PIN 6 หลักที่ได้มาส่งในแชทนี้เพื่อเริ่มต้นใช้งานครับ',
+        quickReply: {
+          items: [
+            { type: 'action', action: { type: 'message', label: '❓ ช่วยเหลือ', text: 'ช่วยเหลือ' } },
+            { type: 'action', action: { type: 'message', label: '📦 อุปกรณ์ว่าง', text: 'อุปกรณ์ว่าง' } },
+          ],
+        },
       });
       return;
     }
