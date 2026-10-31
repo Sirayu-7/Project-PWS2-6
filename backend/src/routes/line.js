@@ -428,6 +428,27 @@ async function handleWebhookEvent(event) {
         });
         return;
       }
+
+      // Default reply for linked user if message not recognized
+      await lineService.replyMessage(event.replyToken, {
+        type: 'text',
+        text: `🤖 คุณ: ${currentUser.name} (${currentUser.role_name})\n\nคำสั่งที่สามารถใช้งานได้:\n• พิมพ์ "รายการยืมของฉัน" เพื่อดูรายการที่คุณยืม\n• พิมพ์ "อุปกรณ์ว่าง" เพื่อดูอุปกรณ์ที่พร้อมใช้งาน\n• พิมพ์ "ช่วยเหลือ" เพื่อดูวิธีใช้งาน`,
+        quickReply: {
+          items: [
+            { type: 'action', action: { type: 'message', label: '📋 รายการยืมของฉัน', text: 'รายการยืมของฉัน' } },
+            { type: 'action', action: { type: 'message', label: '📦 อุปกรณ์ว่าง', text: 'อุปกรณ์ว่าง' } },
+            { type: 'action', action: { type: 'message', label: '❓ ช่วยเหลือ', text: 'ช่วยเหลือ' } },
+          ],
+        },
+      });
+      return;
+    } else {
+      // User is not linked yet
+      await lineService.replyMessage(event.replyToken, {
+        type: 'text',
+        text: '👋 สวัสดีครับ บัญชี LINE ของคุณยังไม่ได้เชื่อมต่อกับระบบ IT Equipment\n\n📌 วิธีเชื่อมต่อ:\n1. เข้าสู่ระบบผ่านหน้าเว็บ\n2. กดที่โปรไฟล์ -> เลือกแท็บ "การเชื่อมต่อ LINE"\n3. กดปุ่ม "ขอรหัสเชื่อมต่อ LINE (PIN)"\n4. นำรหัส PIN 6 หลักที่ได้มาส่งในแชทนี้เพื่อเริ่มต้นใช้งานครับ',
+      });
+      return;
     }
   }
 }
