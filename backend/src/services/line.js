@@ -474,7 +474,7 @@ async function notifyMaintenanceTicket(maintenanceId) {
       SELECT m.*, e.equipment_name, e.asset_code, u.name AS reporter_name
       FROM maintenance m
       JOIN equipment e ON e.equipment_id = m.equipment_id
-      JOIN users u ON u.user_id = m.reported_by
+      JOIN users u ON u.user_id = m.reporter_id
       WHERE m.maintenance_id = ?
     `, [maintenanceId]);
     if (!rows.length) return null;
@@ -482,7 +482,7 @@ async function notifyMaintenanceTicket(maintenanceId) {
     return await sendToStaffChannel(card);
   } catch (e) {
     console.error('[LINE_NOTIFY_MAINT_ERROR]:', e.message);
-    return null;
+    throw e;
   }
 }
 

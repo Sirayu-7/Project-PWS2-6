@@ -3,8 +3,15 @@ const lineService = require('./line');
 const { emitToAll } = require('./realtime');
 
 let cronTimer = null;
+let lastScannedDate = null;
 
-async function runDailyScan() {
+async function runDailyScan(options = {}) {
+  const todayStr = new Date().toISOString().slice(0, 10);
+  if (!options.force && lastScannedDate === todayStr) {
+    console.log(`[CRON] Daily scan already completed for today (${todayStr}). Skipping.`);
+    return { skipped: true, dueTodayCount: 0, overdueCount: 0 };
+  }
+
   console.log('[CRON] Running daily loan scan (due today & overdue)...');
   let dueTodayCount = 0;
   let overdueCount = 0;
@@ -58,11 +65,12 @@ async function runDailyScan() {
     }
 
     console.log(`[CRON] Daily scan complete: ${dueTodayCount} due today, ${overdueCount} marked overdue.`);
+    lastScannedDate = todayStr;
   } catch (e) {
     console.error('[CRON_SCAN_ERROR]:', e.message);
   }
 
-  return { dueTodayCount, overdueCount };
+  return { skipped: false, dueTodayCount, overdueCount };
 }
 
 function startCron() {
@@ -84,3 +92,4 @@ module.exports = {
   startCron,
   stopCron,
 };
+

@@ -279,6 +279,8 @@ async function handleWebhookEvent(event) {
       }
 
       const match = tokens[0];
+      // Detach any previous owner of this LINE ID to prevent unique constraint error
+      await pool.execute('UPDATE users SET line_user_id = NULL WHERE line_user_id = ?', [lineUserId]);
       await pool.execute('UPDATE users SET line_user_id = ? WHERE user_id = ?', [lineUserId, match.user_id]);
       await pool.execute('UPDATE line_link_tokens SET is_used = 1 WHERE token_id = ?', [match.token_id]);
 
@@ -327,11 +329,19 @@ async function handleWebhookEvent(event) {
 
         if (rows.length && rows[0].status === 'Pending') {
           const loan = rows[0];
-          await pool.execute(
-            `UPDATE loans SET status = 'Rejected', remark = ?, approved_by = ?, approved_at = NOW() WHERE loan_id = ?`,
+          const [upd] = await pool.execute(
+            `UPDATE loans SET status = 'Rejected', remark = ?, approved_by = ?, approved_at = NOW() WHERE loan_id = ? AND status = 'Pending'`,
             [text, currentUser.user_id, loanId]
           );
           await pool.execute('DELETE FROM line_conversation_states WHERE user_id = ?', [currentUser.user_id]);
+
+          if (upd.affectedRows === 0) {
+            await lineService.replyMessage(event.replyToken, {
+              type: 'text',
+              text: `ℹ️ คำขอยืม #${loanId} ได้รับการดำเนินการไปแล้ว`,
+            });
+            return;
+          }
 
           try {
             await writeAudit({ userId: currentUser.user_id, action: 'REJECT_LOAN', tableName: 'loans', recordId: loanId });

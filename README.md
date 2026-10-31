@@ -82,8 +82,8 @@
   JWT_SECRET=it-equipment-project-change-this-secret
 
   # LINE Messaging API Configuration
-  LINE_CHANNEL_ID=2012304828
-  LINE_CHANNEL_SECRET=90bf72df009f082ce57967292356e0f2
+  LINE_CHANNEL_ID=your_channel_id
+  LINE_CHANNEL_SECRET=your_channel_secret
   LINE_CHANNEL_ACCESS_TOKEN=your_channel_access_token_here
   LINE_BOT_BASIC_ID=@yourbotid
   LINE_STAFF_GROUP_ID=

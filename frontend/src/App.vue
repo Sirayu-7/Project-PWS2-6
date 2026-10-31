@@ -504,7 +504,10 @@ watch(() => route.path, (newPath) => {
   }
 })
 
-onUnmounted(closeRealtime)
+onUnmounted(() => {
+  closeRealtime()
+  if (pinInterval) clearInterval(pinInterval)
+})
 </script>
 
 <style scoped>
