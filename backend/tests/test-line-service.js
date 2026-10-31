@@ -53,3 +53,4 @@ assert.strictEqual(loansCarousel.contents.contents.length, 2);
 console.log('[✓] buildUserLoansCarousel test passed');
 
 console.log('\nAll lineService unit tests PASSED successfully!');
+
