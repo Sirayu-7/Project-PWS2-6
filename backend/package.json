@@ -9,6 +9,7 @@
     "init-db": "node scripts/init-db.js"
   },
   "dependencies": {
+    "@line/bot-sdk": "^11.4.0",
     "bcryptjs": "^3.0.0",
     "cors": "^2.8.5",
     "dotenv": "^17.0.0",
