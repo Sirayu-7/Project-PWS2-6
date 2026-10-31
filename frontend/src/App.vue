@@ -1,5 +1,6 @@
 <template>
-  <div class="app-shell">
+  <RouterView v-if="isAuthPage" />
+  <div v-else class="app-shell">
     <aside class="sidebar">
       <div class="brand">
         <div class="brand-icon">IT</div>
@@ -167,11 +168,12 @@
 </template>
 
 <script setup>
-import { computed, ref, onMounted, onUnmounted } from 'vue'
+import { computed, ref, onMounted, onUnmounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import api from './services/api'
 
 const route = useRoute(), router = useRouter()
+const isAuthPage = computed(() => route.path === '/login' || !!route.meta?.public)
 const user = computed(() => JSON.parse(localStorage.getItem('it_user') || '{}'))
 const userName = computed(() => user.value.name || 'ผู้ใช้งาน')
 const userRole = computed(() => user.value.role || 'ผู้ใช้งานระบบ')
@@ -367,9 +369,21 @@ const logout = () => {
 }
 
 onMounted(() => {
-  loadNotifications()
-  connectRealtime()
+  if (!isAuthPage.value) {
+    loadNotifications()
+    connectRealtime()
+  }
 })
+
+watch(() => route.path, (newPath) => {
+  if (newPath !== '/login' && !isAuthPage.value) {
+    loadNotifications()
+    connectRealtime()
+  } else {
+    closeRealtime()
+  }
+})
+
 onUnmounted(closeRealtime)
 </script>
 
