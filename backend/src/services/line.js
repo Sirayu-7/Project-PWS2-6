@@ -365,6 +365,38 @@ function buildMaintenanceCard(ticket) {
           },
         ],
       },
+      footer: {
+        type: 'box',
+        layout: 'horizontal',
+        spacing: 'sm',
+        paddingAll: '12px',
+        contents: [
+          {
+            type: 'button',
+            style: 'primary',
+            color: '#2563eb',
+            height: 'sm',
+            action: {
+              type: 'postback',
+              label: '🔧 เริ่มซ่อมแซม',
+              data: `action=update_maint_status&maint_id=${ticket.maintenance_id}&to_status=Repairing`,
+              displayText: `เริ่มซ่อมแซม #${ticket.maintenance_id}`,
+            },
+          },
+          {
+            type: 'button',
+            style: 'primary',
+            color: '#16a34a',
+            height: 'sm',
+            action: {
+              type: 'postback',
+              label: '✅ ซ่อมเสร็จ',
+              data: `action=update_maint_status&maint_id=${ticket.maintenance_id}&to_status=Completed`,
+              displayText: `บันทึกซ่อมเสร็จ #${ticket.maintenance_id}`,
+            },
+          },
+        ],
+      },
     },
   };
 }
@@ -654,6 +686,63 @@ function buildMaintenanceTicketsCarousel(tickets) {
               { type: 'text', text: 'รายละเอียด:', size: 'xxs', color: '#64748b' },
               { type: 'text', text: t.problem_description || '-', size: 'xxs', color: '#334155', wrap: true, margin: 'xs' },
             ],
+          },
+        ],
+      },
+      footer: {
+        type: 'box',
+        layout: 'horizontal',
+        spacing: 'sm',
+        paddingAll: '10px',
+        contents: t.status === 'Repairing' ? [
+          {
+            type: 'button',
+            style: 'primary',
+            color: '#16a34a',
+            height: 'sm',
+            action: {
+              type: 'postback',
+              label: '✅ ซ่อมเสร็จสิ้น',
+              data: `action=update_maint_status&maint_id=${t.maintenance_id}&to_status=Completed`,
+              displayText: `บันทึกซ่อมเสร็จ #${t.maintenance_id}`,
+            },
+          },
+          {
+            type: 'button',
+            style: 'secondary',
+            color: '#dc2626',
+            height: 'sm',
+            action: {
+              type: 'postback',
+              label: '❌ ยกเลิก',
+              data: `action=update_maint_status&maint_id=${t.maintenance_id}&to_status=Cancelled`,
+              displayText: `ยกเลิกการซ่อม #${t.maintenance_id}`,
+            },
+          },
+        ] : [
+          {
+            type: 'button',
+            style: 'primary',
+            color: '#2563eb',
+            height: 'sm',
+            action: {
+              type: 'postback',
+              label: '🔧 เริ่มซ่อม',
+              data: `action=update_maint_status&maint_id=${t.maintenance_id}&to_status=Repairing`,
+              displayText: `เริ่มซ่อมแซม #${t.maintenance_id}`,
+            },
+          },
+          {
+            type: 'button',
+            style: 'primary',
+            color: '#16a34a',
+            height: 'sm',
+            action: {
+              type: 'postback',
+              label: '✅ ซ่อมเสร็จ',
+              data: `action=update_maint_status&maint_id=${t.maintenance_id}&to_status=Completed`,
+              displayText: `บันทึกซ่อมเสร็จ #${t.maintenance_id}`,
+            },
           },
         ],
       },

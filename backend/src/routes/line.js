@@ -279,6 +279,113 @@ async function handleWebhookEvent(event) {
       });
       return;
     }
+
+    if (action === 'update_maint_status') {
+      const maintId = params.get('maint_id');
+      const toStatus = params.get('to_status');
+
+      const allowed = ['Received', 'Diagnosing', 'Repairing', 'Completed', 'Cancelled'];
+      if (!allowed.includes(toStatus)) {
+        await lineService.replyMessage(event.replyToken, {
+          type: 'text',
+          text: '⚠️ สถานะไม่ถูกต้อง',
+          quickReply: getRoleQuickReply(currentUser.role_name),
+        });
+        return;
+      }
+
+      const [rows] = await pool.execute(`
+        SELECT m.*, e.equipment_name, e.asset_code, u.name AS reporter_name, u.line_user_id AS reporter_line_id
+        FROM maintenance m
+        JOIN equipment e ON e.equipment_id = m.equipment_id
+        JOIN users u ON u.user_id = m.reporter_id
+        WHERE m.maintenance_id = ?
+      `, [maintId]);
+
+      if (!rows.length) {
+        await lineService.replyMessage(event.replyToken, {
+          type: 'text',
+          text: '❌ ไม่พบรายการแจ้งซ่อมนี้ในระบบ',
+          quickReply: getRoleQuickReply(currentUser.role_name),
+        });
+        return;
+      }
+
+      const ticket = rows[0];
+      if (['Completed', 'Cancelled'].includes(ticket.status)) {
+        await lineService.replyMessage(event.replyToken, {
+          type: 'text',
+          text: `ℹ️ รายการแจ้งซ่อม #${maintId} (${ticket.equipment_name}) ได้เสร็จสิ้นหรือยกเลิกไปแล้ว (สถานะปัจจุบัน: ${ticket.status})`,
+          quickReply: getRoleQuickReply(currentUser.role_name),
+        });
+        return;
+      }
+
+      let startedAt = ticket.started_at;
+      let completedAt = ticket.completed_at;
+      if (['Diagnosing', 'Repairing'].includes(toStatus) && !startedAt) {
+        startedAt = new Date();
+      }
+      if (['Completed', 'Cancelled'].includes(toStatus)) {
+        completedAt = new Date();
+      }
+
+      const remark = `อัปเดตผ่าน LINE โดย ${currentUser.name}`;
+
+      await pool.execute(`
+        UPDATE maintenance
+        SET status = ?, technician_id = COALESCE(technician_id, ?), started_at = COALESCE(?, started_at), completed_at = COALESCE(?, completed_at)
+        WHERE maintenance_id = ?
+      `, [toStatus, currentUser.user_id, startedAt, completedAt, maintId]);
+
+      await pool.execute(
+        `INSERT INTO maintenance_logs(maintenance_id, status, remark, updated_by) VALUES(?, ?, ?, ?)`,
+        [maintId, toStatus, remark, currentUser.user_id]
+      );
+
+      // Equipment status sync
+      if (['Completed', 'Cancelled'].includes(toStatus)) {
+        await pool.execute(
+          `UPDATE equipment SET status = CASE WHEN status = 'Maintenance' THEN 'Available' ELSE status END WHERE equipment_id = ?`,
+          [ticket.equipment_id]
+        );
+      } else {
+        await pool.execute(
+          `UPDATE equipment SET status = 'Maintenance' WHERE equipment_id = ? AND status <> 'Borrowed'`,
+          [ticket.equipment_id]
+        );
+      }
+
+      try {
+        await writeAudit({ userId: currentUser.user_id, action: 'UPDATE_MAINTENANCE_STATUS', tableName: 'maintenance', recordId: maintId });
+      } catch {}
+
+      emitToAll('data:refresh', { source: '/api/maintenance', method: 'PUT' });
+
+      const statusLabels = {
+        Repairing: 'กำลังซ่อมแซม 🔧',
+        Completed: 'ซ่อมเสร็จสิ้นแล้ว 🎉',
+        Cancelled: 'ยกเลิกการแจ้งซ่อม ❌',
+        Received: 'รับเรื่องแล้ว 📋',
+      };
+      const label = statusLabels[toStatus] || toStatus;
+
+      // Reply to staff
+      await lineService.replyMessage(event.replyToken, {
+        type: 'text',
+        text: `✅ อัปเดตรายการแจ้งซ่อม #${maintId} (${ticket.equipment_name})\n\nสถานะใหม่: ${label}\nดำเนินการโดย: ${currentUser.name}${toStatus === 'Completed' ? '\n\n📦 อุปกรณ์กลับสู่สถานะพร้อมใช้งาน (Available) เรียบร้อยแล้วครับ' : ''}`,
+        quickReply: getRoleQuickReply(currentUser.role_name),
+      });
+
+      // Push notice to reporter if linked
+      if (ticket.reporter_line_id) {
+        await lineService.sendPush(ticket.reporter_line_id, {
+          type: 'text',
+          text: `🔔 แจ้งเตือนสถานะงานซ่อม\n\nรายการ #${maintId} (${ticket.equipment_name})\nสถานะ: ${label}\nเจ้าหน้าที่: ${currentUser.name}`,
+        });
+      }
+      return;
+    }
   }
 
   // 3. Message event
