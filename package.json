@@ -4,6 +4,7 @@
   "private": true,
   "description": "IT Equipment Management System (ระบบจัดการอุปกรณ์ IT)",
   "scripts": {
+    "build": "npm run build --prefix frontend",
     "setup": "npm run install:all && npm run init:db",
     "install:all": "cd backend && npm install && cd ../frontend && npm install",
     "init:db": "cd backend && npm run init-db",
