@@ -110,7 +110,8 @@
           <button @click="showProfileModal = false">×</button>
         </div>
 
-        <div class="profile-header-card">
+        <div class="profile-modal-body">
+          <div class="profile-header-card">
           <div class="avatar profile-modal-avatar">{{ initials }}</div>
           <div>
             <h3>{{ userName }}</h3>
@@ -254,6 +255,7 @@
               </button>
             </div>
           </div>
+        </div>
         </div>
       </div>
     </div>
@@ -627,17 +629,22 @@ onUnmounted(() => {
   z-index: 50;
 }
 .profile-dialog {
-  width: min(500px, 100%);
+  width: min(520px, calc(100vw - 32px));
+  max-height: min(88vh, 720px);
+  display: flex;
+  flex-direction: column;
   background: #fff;
-  border-radius: 14px;
-  padding: 24px;
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+  border-radius: 16px;
+  padding: 20px 24px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+  overflow: hidden;
 }
 .modal-head {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 18px;
+  margin-bottom: 12px;
+  flex-shrink: 0;
 }
 .modal-head h2 {
   margin: 0;
@@ -649,23 +656,41 @@ onUnmounted(() => {
   font-size: 24px;
   cursor: pointer;
 }
+.profile-modal-body {
+  overflow-y: auto;
+  padding-right: 6px;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+.profile-modal-body::-webkit-scrollbar {
+  width: 6px;
+}
+.profile-modal-body::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 99px;
+}
+.profile-modal-body::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
 .profile-header-card {
   display: flex;
   align-items: center;
-  gap: 16px;
-  padding: 16px;
+  gap: 12px;
+  padding: 10px 14px;
   background: #f8fafc;
   border: 1px solid #e2e8f0;
   border-radius: 12px;
-  margin-bottom: 16px;
+  margin-bottom: 12px;
+  flex-shrink: 0;
 }
 .profile-modal-avatar {
-  width: 52px;
-  height: 52px;
-  font-size: 18px;
+  width: 44px;
+  height: 44px;
+  font-size: 16px;
   background: #2563eb;
   color: #fff;
-  border-radius: 14px;
+  border-radius: 12px;
 }
 .profile-header-card h3 {
   margin: 0 0 4px;
@@ -689,7 +714,8 @@ onUnmounted(() => {
   display: flex;
   gap: 8px;
   border-bottom: 1px solid #e2e8f0;
-  margin-bottom: 16px;
+  margin-bottom: 12px;
+  flex-shrink: 0;
 }
 .profile-tabs button {
   border: 0;
@@ -764,7 +790,7 @@ onUnmounted(() => {
   color: #166534;
 }
 .line-status-box {
-  padding: 20px;
+  padding: 12px 14px;
   border-radius: 12px;
   background: #f8fafc;
   border: 1px solid #e2e8f0;
@@ -775,17 +801,17 @@ onUnmounted(() => {
   border-color: #bbf7d0;
 }
 .line-badge-icon {
-  font-size: 32px;
-  margin-bottom: 8px;
+  font-size: 24px;
+  margin-bottom: 4px;
 }
 .line-status-box h4 {
-  margin: 0 0 6px;
-  font-size: 16px;
+  margin: 0 0 4px;
+  font-size: 15px;
 }
 .line-status-box p {
   color: #64748b;
-  font-size: 13px;
-  margin: 0 0 14px;
+  font-size: 12px;
+  margin: 0 0 8px;
 }
 .line-id-tag {
   display: inline-block;
@@ -814,101 +840,101 @@ onUnmounted(() => {
   background: #fff;
   border: 2px dashed #3b82f6;
   border-radius: 12px;
-  padding: 20px;
-  margin: 16px 0;
+  padding: 10px 14px;
+  margin: 8px 0;
 }
 .pin-label {
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 600;
   color: #1e40af;
 }
 .pin-number {
-  font-size: 36px;
+  font-size: 28px;
   font-weight: 800;
-  letter-spacing: 8px;
+  letter-spacing: 6px;
   color: #2563eb;
-  margin: 8px 0;
+  margin: 2px 0;
   font-family: monospace;
 }
 .pin-expiry {
   display: block;
   color: #d97706;
-  font-size: 12px;
-  margin-bottom: 14px;
+  font-size: 11px;
+  margin-bottom: 6px;
 }
 .pin-steps {
   text-align: left;
   background: #eff6ff;
   border-radius: 8px;
-  padding: 12px 16px;
-  font-size: 12px;
+  padding: 8px 12px;
+  font-size: 11px;
   color: #1e3a8a;
 }
 .pin-steps ol {
-  margin: 6px 0 0;
-  padding-left: 20px;
+  margin: 4px 0 0;
+  padding-left: 18px;
 }
 .pin-steps li {
-  margin-bottom: 4px;
+  margin-bottom: 2px;
 }
 .line-channel-card {
   background: #fff;
   border: 1px solid #d1fae5;
   border-radius: 12px;
-  padding: 16px;
-  margin: 16px 0;
+  padding: 10px 12px;
+  margin: 8px 0;
   text-align: left;
   box-shadow: 0 2px 8px rgba(6, 199, 85, 0.06);
 }
 .channel-header {
   display: flex;
   align-items: center;
-  gap: 12px;
-  margin-bottom: 14px;
+  gap: 10px;
+  margin-bottom: 8px;
 }
 .line-logo-badge {
   background: #06c755;
   color: #fff;
   font-weight: 800;
-  font-size: 13px;
-  padding: 5px 10px;
-  border-radius: 8px;
+  font-size: 12px;
+  padding: 4px 8px;
+  border-radius: 6px;
   letter-spacing: 0.5px;
 }
 .channel-header strong {
   display: block;
-  font-size: 14px;
+  font-size: 13px;
   color: #0f172a;
 }
 .channel-header small {
   display: block;
   font-size: 11px;
   color: #64748b;
-  margin-top: 2px;
+  margin-top: 1px;
 }
 .channel-body {
   display: flex;
   align-items: center;
   justify-content: space-around;
-  gap: 16px;
+  gap: 12px;
   background: #f0fdf4;
   border: 1px solid #bbf7d0;
   border-radius: 10px;
-  padding: 14px;
+  padding: 8px 12px;
 }
 .qr-box {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 6px;
+  gap: 4px;
   flex-shrink: 0;
 }
 .qr-img {
-  width: 120px;
-  height: 120px;
-  border-radius: 8px;
+  width: 85px;
+  height: 85px;
+  border-radius: 6px;
   background: #fff;
-  padding: 4px;
+  padding: 3px;
   border: 1px solid #dcfce7;
   object-fit: contain;
 }
@@ -920,7 +946,7 @@ onUnmounted(() => {
 .channel-actions {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 8px;
   flex: 1;
 }
 .channel-id-row {
@@ -928,26 +954,26 @@ onUnmounted(() => {
   align-items: center;
   gap: 8px;
   background: #fff;
-  padding: 8px 12px;
-  border-radius: 8px;
+  padding: 6px 10px;
+  border-radius: 6px;
   border: 1px solid #cbd5e1;
 }
 .id-label {
-  font-size: 12px;
+  font-size: 11px;
   color: #64748b;
 }
 .id-val {
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 700;
   color: #06c755;
   letter-spacing: 0.5px;
 }
 .btn-copy-id {
   margin-left: auto;
-  padding: 4px 10px;
+  padding: 3px 8px;
   font-size: 11px;
   border: 1px solid #cbd5e1;
-  border-radius: 6px;
+  border-radius: 5px;
   background: #f8fafc;
   color: #334155;
   cursor: pointer;
@@ -964,9 +990,9 @@ onUnmounted(() => {
   background: #06c755;
   color: #fff;
   font-weight: 700;
-  font-size: 13px;
-  padding: 10px 16px;
-  border-radius: 8px;
+  font-size: 12px;
+  padding: 8px 12px;
+  border-radius: 6px;
   text-decoration: none;
   transition: background 0.15s;
   box-shadow: 0 2px 6px rgba(6, 199, 85, 0.25);
