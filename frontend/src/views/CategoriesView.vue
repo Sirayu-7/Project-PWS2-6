@@ -101,6 +101,7 @@
 import { ref, computed, onMounted } from 'vue'
 import api from '../services/api'
 import { useAuthStore } from '../stores/auth'
+import { useAutoRefresh } from '../composables/useAutoRefresh'
 
 const auth = useAuthStore()
 const categories = ref([])
@@ -202,6 +203,7 @@ async function removeCategory(cat) {
 }
 
 onMounted(loadCategories)
+useAutoRefresh(loadCategories)
 </script>
 
 <style scoped>

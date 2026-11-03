@@ -11,4 +11,21 @@ api.interceptors.request.use((config) => {
   return config
 })
 
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    // If backend returns 401 Unauthorized (e.g. token expired, invalid)
+    if (error.response?.status === 401) {
+      localStorage.removeItem('it_token')
+      localStorage.removeItem('it_user')
+      localStorage.removeItem('it_permissions')
+      // Only redirect if current path is not already login
+      if (typeof window !== 'undefined' && !window.location.pathname.includes('/login')) {
+        window.location.href = '/login'
+      }
+    }
+    return Promise.reject(error)
+  }
+)
+
 export default api

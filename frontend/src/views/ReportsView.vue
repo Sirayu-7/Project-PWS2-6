@@ -251,6 +251,7 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import api from '../services/api'
+import { useAutoRefresh } from '../composables/useAutoRefresh'
 
 const error = ref('')
 const loading = ref(false)
@@ -439,6 +440,7 @@ function exportCurrentTabCSV() {
 }
 
 onMounted(loadAll)
+useAutoRefresh(loadAll)
 </script>
 
 <style scoped>

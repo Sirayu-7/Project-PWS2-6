@@ -11,8 +11,19 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import api from '../services/api'
-const rows=ref([]),error=ref('')
-const load=async()=>{error.value='';try{const r=await api.get('/audit');rows.value=r.data.data||[]}catch(e){error.value=e.response?.data?.message||'ไม่สามารถโหลดประวัติการทำรายการได้'}}
-const formatDate=v=>v?new Date(v).toLocaleString('th-TH'):'-'
+import { useAutoRefresh } from '../composables/useAutoRefresh'
+const rows = ref([])
+const error = ref('')
+const load = async () => {
+  error.value = ''
+  try {
+    const r = await api.get('/audit')
+    rows.value = r.data.data || []
+  } catch (e) {
+    error.value = e.response?.data?.message || 'ไม่สามารถโหลดประวัติการทำรายการได้'
+  }
+}
+const formatDate = v => v ? new Date(v).toLocaleString('th-TH') : '-'
 onMounted(load)
+useAutoRefresh(load)
 </script>

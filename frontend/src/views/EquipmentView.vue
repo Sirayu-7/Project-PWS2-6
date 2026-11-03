@@ -319,6 +319,7 @@
 import { computed, onMounted, ref } from 'vue'
 import api from '../services/api'
 import { useAuthStore } from '../stores/auth'
+import { useAutoRefresh } from '../composables/useAutoRefresh'
 
 const auth = useAuthStore()
 const equipment = ref([])
@@ -569,6 +570,8 @@ onMounted(async () => {
     error.value = 'ไม่สามารถเชื่อมต่อข้อมูลได้'
   }
 })
+
+useAutoRefresh(loadEquipment)
 </script>
 
 <style scoped>

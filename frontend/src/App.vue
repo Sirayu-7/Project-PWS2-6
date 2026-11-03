@@ -218,10 +218,12 @@
 import { computed, ref, onMounted, onUnmounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import api from './services/api'
+import { useAuthStore } from './stores/auth'
 
 const route = useRoute(), router = useRouter()
+const auth = useAuthStore()
 const isAuthPage = computed(() => route.path === '/login' || !!route.meta?.public)
-const user = computed(() => JSON.parse(localStorage.getItem('it_user') || '{}'))
+const user = computed(() => auth.user || {})
 const userName = computed(() => user.value.name || 'ผู้ใช้งาน')
 const userRole = computed(() => user.value.role || 'ผู้ใช้งานระบบ')
 const isAdmin = computed(() => user.value.role === 'Administrator')
@@ -332,8 +334,11 @@ async function updateProfileName() {
   profileSuccess.value = ''
   try {
     const { data } = await api.put('/auth/profile', { name: profileName.value })
-    localStorage.setItem('it_user', JSON.stringify(data.user))
-    if (data.token) localStorage.setItem('it_token', data.token)
+    if (data.user) auth.setUser(data.user)
+    if (data.token) {
+      auth.token = data.token
+      localStorage.setItem('it_token', data.token)
+    }
     profileSuccess.value = 'อัปเดตชื่อสำเร็จเรียบร้อย'
   } catch (e) {
     profileError.value = e.response?.data?.message || 'ไม่สามารถอัปเดตชื่อได้'
@@ -483,20 +488,28 @@ const connectRealtime = () => {
 
 const logout = () => {
   closeRealtime()
-  localStorage.removeItem('it_token')
-  localStorage.removeItem('it_user')
+  auth.logout()
   router.push('/login')
+}
+
+const onWindowFocus = () => {
+  if (!isAuthPage.value && auth.isAuthenticated) {
+    auth.checkSession()
+  }
 }
 
 onMounted(() => {
   if (!isAuthPage.value) {
+    auth.checkSession()
     loadNotifications()
     connectRealtime()
   }
+  window.addEventListener('focus', onWindowFocus)
 })
 
 watch(() => route.path, (newPath) => {
   if (newPath !== '/login' && !isAuthPage.value) {
+    auth.checkSession()
     loadNotifications()
     connectRealtime()
   } else {
@@ -507,6 +520,7 @@ watch(() => route.path, (newPath) => {
 onUnmounted(() => {
   closeRealtime()
   if (pinInterval) clearInterval(pinInterval)
+  window.removeEventListener('focus', onWindowFocus)
 })
 </script>
 

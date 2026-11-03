@@ -165,6 +165,7 @@
 import { ref, computed, onMounted } from 'vue'
 import api from '../services/api'
 import { useAuthStore } from '../stores/auth'
+import { useAutoRefresh } from '../composables/useAutoRefresh'
 
 const auth = useAuthStore()
 const items = ref([])
@@ -320,6 +321,7 @@ async function returnLoan() {
 }
 
 onMounted(load)
+useAutoRefresh(load)
 </script>
 
 <style scoped>
