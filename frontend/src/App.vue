@@ -174,6 +174,11 @@
               <h4>เชื่อมต่อกับ LINE เรียบร้อยแล้ว</h4>
               <p>คุณจะได้รับข้อความแจ้งเตือนผลการยืม-คืน แจ้งซ่อม และทำรายการผ่าน LINE Bot ได้ทันที</p>
               <div class="line-id-tag">LINE User ID: <code>{{ lineStatus.line_user_id }}</code></div>
+              <div style="margin-top: 10px;">
+                <a href="https://line.me/R/ti/p/@585vdppz" target="_blank" rel="noopener noreferrer" class="line-chat-link">
+                  💬 เปิดแชท LINE Bot (@585vdppz) →
+                </a>
+              </div>
             </div>
             <div class="modal-actions">
               <button type="button" @click="showProfileModal = false">ปิด</button>
@@ -188,15 +193,56 @@
             <h4>ยังไม่ได้เชื่อมต่อบัญชี LINE</h4>
             <p>ผูกบัญชีเพื่อรับแจ้งเตือนสถานะการยืม แจ้งซ่อม เตือนก่อนครบกำหนดคืน และกดอนุมัติคำขอผ่าน LINE</p>
 
+            <!-- ช่องทางการเพิ่มเพื่อน LINE Official Account -->
+            <div class="line-channel-card">
+              <div class="channel-header">
+                <div class="line-logo-badge">LINE</div>
+                <div>
+                  <strong>LINE Official Account ระบบไอที</strong>
+                  <small>เพิ่มเพื่อนเพื่อเริ่มรับการแจ้งเตือนและผูกบัญชี</small>
+                </div>
+              </div>
+
+              <div class="channel-body">
+                <div class="qr-box">
+                  <img
+                    src="https://api.qrserver.com/v1/create-qr-code/?size=140x140&data=https://line.me/R/ti/p/%40585vdppz"
+                    alt="QR Code LINE Bot"
+                    class="qr-img"
+                  />
+                  <span>สแกนเพื่อเพิ่มเพื่อน</span>
+                </div>
+
+                <div class="channel-actions">
+                  <div class="channel-id-row">
+                    <span class="id-label">LINE ID:</span>
+                    <code class="id-val">@585vdppz</code>
+                    <button type="button" class="btn-copy-id" @click="copyLineId">
+                      {{ lineCopied ? '✓ คัดลอกแล้ว' : 'คัดลอก ID' }}
+                    </button>
+                  </div>
+
+                  <a
+                    href="https://line.me/R/ti/p/@585vdppz"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="btn-line-add"
+                  >
+                    💬 + เพิ่มเพื่อนใน LINE ทันที
+                  </a>
+                </div>
+              </div>
+            </div>
+
             <div v-if="linePin" class="pin-card">
               <span class="pin-label">รหัสสำหรับเชื่อมต่อ LINE (PIN 6 หลัก)</span>
               <div class="pin-number">{{ linePin }}</div>
               <small class="pin-expiry">⏱ รหัสนี้มีอายุใช้งาน 10 นาที (คงเหลือ {{ pinTimerSeconds }} วินาที)</small>
               <div class="pin-steps">
-                <strong>วิธีเปิดใช้งาน:</strong>
+                <strong>ขั้นตอนการเปิดใช้งาน:</strong>
                 <ol>
-                  <li>เพิ่มเพื่อน LINE Official Account ของระบบไอที</li>
-                  <li>ส่งข้อความรหัสตัวเลข <b>{{ linePin }}</b> เข้าไปในห้องแชท</li>
+                  <li>เพิ่มเพื่อน LINE Bot ผ่าน ID <b>@585vdppz</b> หรือปุ่มเพิ่มเพื่อนด้านบน</li>
+                  <li>ส่งข้อความรหัสตัวเลข <b>{{ linePin }}</b> เข้าไปในห้องแชท LINE</li>
                   <li>ระบบจะทำการยืนยันและผูกบัญชีให้อัตโนมัติทันที</li>
                 </ol>
               </div>
@@ -266,7 +312,18 @@ const profileError = ref('')
 const lineStatus = ref({ loading: false, linked: false, line_user_id: null, unlinking: false, requestingPin: false })
 const linePin = ref(null)
 const pinTimerSeconds = ref(600)
+const lineCopied = ref(false)
 let pinInterval = null
+
+function copyLineId() {
+  if (navigator.clipboard) {
+    navigator.clipboard.writeText('@585vdppz')
+  }
+  lineCopied.value = true
+  setTimeout(() => {
+    lineCopied.value = false
+  }, 2000)
+}
 
 async function checkLineStatus() {
   lineStatus.value.loading = true
@@ -793,5 +850,143 @@ onUnmounted(() => {
 }
 .pin-steps li {
   margin-bottom: 4px;
+}
+.line-channel-card {
+  background: #fff;
+  border: 1px solid #d1fae5;
+  border-radius: 12px;
+  padding: 16px;
+  margin: 16px 0;
+  text-align: left;
+  box-shadow: 0 2px 8px rgba(6, 199, 85, 0.06);
+}
+.channel-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+.line-logo-badge {
+  background: #06c755;
+  color: #fff;
+  font-weight: 800;
+  font-size: 13px;
+  padding: 5px 10px;
+  border-radius: 8px;
+  letter-spacing: 0.5px;
+}
+.channel-header strong {
+  display: block;
+  font-size: 14px;
+  color: #0f172a;
+}
+.channel-header small {
+  display: block;
+  font-size: 11px;
+  color: #64748b;
+  margin-top: 2px;
+}
+.channel-body {
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  gap: 16px;
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  border-radius: 10px;
+  padding: 14px;
+}
+.qr-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+.qr-img {
+  width: 120px;
+  height: 120px;
+  border-radius: 8px;
+  background: #fff;
+  padding: 4px;
+  border: 1px solid #dcfce7;
+  object-fit: contain;
+}
+.qr-box span {
+  font-size: 10px;
+  color: #166534;
+  font-weight: 600;
+}
+.channel-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  flex: 1;
+}
+.channel-id-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #fff;
+  padding: 8px 12px;
+  border-radius: 8px;
+  border: 1px solid #cbd5e1;
+}
+.id-label {
+  font-size: 12px;
+  color: #64748b;
+}
+.id-val {
+  font-size: 14px;
+  font-weight: 700;
+  color: #06c755;
+  letter-spacing: 0.5px;
+}
+.btn-copy-id {
+  margin-left: auto;
+  padding: 4px 10px;
+  font-size: 11px;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  background: #f8fafc;
+  color: #334155;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.btn-copy-id:hover {
+  background: #e2e8f0;
+}
+.btn-line-add {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  background: #06c755;
+  color: #fff;
+  font-weight: 700;
+  font-size: 13px;
+  padding: 10px 16px;
+  border-radius: 8px;
+  text-decoration: none;
+  transition: background 0.15s;
+  box-shadow: 0 2px 6px rgba(6, 199, 85, 0.25);
+}
+.btn-line-add:hover {
+  background: #05b04b;
+}
+.line-chat-link {
+  display: inline-block;
+  color: #06c755;
+  font-size: 13px;
+  font-weight: 600;
+  text-decoration: none;
+}
+.line-chat-link:hover {
+  text-decoration: underline;
+}
+@media (max-width: 480px) {
+  .channel-body {
+    flex-direction: column;
+  }
 }
 </style>
