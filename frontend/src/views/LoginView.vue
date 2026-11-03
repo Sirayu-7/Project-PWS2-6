@@ -28,7 +28,12 @@ const auth = useAuthStore()
 const router = useRouter()
 
 async function submit() {
-  if (await auth.login(username.value, password.value)) router.push('/dashboard')
+  const success = await auth.login(username.value, password.value)
+  if (success) {
+    const role = auth.role || auth.user?.role
+    const target = role === 'Borrower' ? '/loan' : '/dashboard'
+    window.location.href = target
+  }
 }
 </script>
 

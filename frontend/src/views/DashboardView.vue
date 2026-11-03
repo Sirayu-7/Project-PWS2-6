@@ -2,9 +2,9 @@
   <div class="dashboard">
     <div class="page-header">
       <div>
-        <div class="eyebrow">SYSTEM OVERVIEW</div>
+        <div class="eyebrow">{{ isBorrower ? 'MY OVERVIEW' : 'SYSTEM OVERVIEW' }}</div>
         <h1>Dashboard</h1>
-        <p>ภาพรวมข้อมูลจริงจากระบบยืม-คืนอุปกรณ์และงานแจ้งซ่อม</p>
+        <p>{{ isBorrower ? 'ภาพรวมการยืม-คืนอุปกรณ์และประวัติการแจ้งซ่อมของคุณ' : 'ภาพรวมข้อมูลจริงจากระบบยืม-คืนอุปกรณ์และงานแจ้งซ่อม' }}</p>
       </div>
       <div class="header-actions">
         <span v-if="lastUpdated" class="updated">อัปเดต {{ lastUpdated }}</span>
@@ -24,7 +24,7 @@
     <section class="dashboard-grid">
       <div class="page-card">
         <div class="card-title">
-          <div><h3>สถานะการยืม-คืน</h3><p>นับจากสถานะจริงในตาราง loans</p></div>
+          <div><h3>{{ isBorrower ? 'สถานะการยืมของคุณ' : 'สถานะการยืม-คืน' }}</h3><p>{{ isBorrower ? 'รายการยืมอุปกรณ์ทั้งหมดของคุณ' : 'นับจากสถานะจริงในตาราง loans' }}</p></div>
           <RouterLink to="/loan" class="text-link">ดูทั้งหมด →</RouterLink>
         </div>
         <div class="loan-status-grid">
@@ -38,7 +38,7 @@
 
       <div class="page-card">
         <div class="card-title">
-          <div><h3>งานแจ้งซ่อม</h3><p>นับตามสถานะจริงในตาราง maintenance</p></div>
+          <div><h3>{{ isBorrower ? 'งานแจ้งซ่อมของคุณ' : 'งานแจ้งซ่อม' }}</h3><p>{{ isBorrower ? 'รายการแจ้งซ่อมทั้งหมดของคุณ' : 'นับตามสถานะจริงในตาราง maintenance' }}</p></div>
           <RouterLink to="/maintenance" class="text-link">ดูทั้งหมด →</RouterLink>
         </div>
         <div class="maintenance-status-grid">
@@ -53,7 +53,7 @@
 
     <section class="data-grid">
       <div class="page-card">
-        <div class="card-title"><div><h3>ภาพรวมรายการยืมอุปกรณ์</h3><p>5 รายการล่าสุดจากฐานข้อมูลจริง</p></div><RouterLink to="/loan" class="text-link">ดูทั้งหมด →</RouterLink></div>
+        <div class="card-title"><div><h3>{{ isBorrower ? 'รายการยืมล่าสุดของคุณ' : 'ภาพรวมรายการยืมอุปกรณ์' }}</h3><p>5 รายการล่าสุดจากฐานข้อมูลจริง</p></div><RouterLink to="/loan" class="text-link">ดูทั้งหมด →</RouterLink></div>
         <div v-if="loading" class="empty">กำลังโหลดข้อมูล…</div>
         <div v-else-if="!summary.recentLoans.length" class="empty">ยังไม่มีรายการยืมอุปกรณ์</div>
         <div v-else class="table-wrap">
@@ -64,7 +64,7 @@
       </div>
 
       <div class="page-card">
-        <div class="card-title"><div><h3>งานแจ้งซ่อมล่าสุด</h3><p>5 รายการล่าสุดจากฐานข้อมูลจริง</p></div><RouterLink to="/maintenance" class="text-link">ดูทั้งหมด →</RouterLink></div>
+        <div class="card-title"><div><h3>{{ isBorrower ? 'งานแจ้งซ่อมล่าสุดของคุณ' : 'งานแจ้งซ่อมล่าสุด' }}</h3><p>5 รายการล่าสุดจากฐานข้อมูลจริง</p></div><RouterLink to="/maintenance" class="text-link">ดูทั้งหมด →</RouterLink></div>
         <div v-if="loading" class="empty">กำลังโหลดข้อมูล…</div>
         <div v-else-if="!summary.recentMaintenance.length" class="empty">ยังไม่มีรายการแจ้งซ่อม</div>
         <div v-else class="table-wrap">
@@ -93,6 +93,7 @@ import api from '../services/api'
 import { useAuthStore } from '../stores/auth'
 
 const auth = useAuthStore()
+const isBorrower = computed(() => auth.role === 'Borrower')
 const loading = ref(false)
 const error = ref('')
 const lastUpdated = ref('')
@@ -101,8 +102,8 @@ const summary = ref({ totalEquipment: 0, available: 0, borrowed: 0, maintenance:
 const statCards = computed(() => [
   { key: 'equipment', label: 'อุปกรณ์ทั้งหมด', value: summary.value.totalEquipment, icon: '▣', tone: 'blue' },
   { key: 'available', label: 'พร้อมใช้งาน', value: summary.value.available, icon: '✓', tone: 'green' },
-  { key: 'borrowed', label: 'กำลังถูกยืม', value: summary.value.borrowed, icon: '⇄', tone: 'orange' },
-  { key: 'maintenance', label: 'อยู่ระหว่างซ่อม', value: summary.value.maintenance, icon: '⚒', tone: 'red' },
+  { key: 'borrowed', label: isBorrower.value ? 'คุณกำลังยืม' : 'กำลังถูกยืม', value: summary.value.borrowed, icon: '⇄', tone: 'orange' },
+  { key: 'maintenance', label: isBorrower.value ? 'แจ้งซ่อมของคุณ' : 'อยู่ระหว่างซ่อม', value: summary.value.maintenance, icon: '⚒', tone: 'red' },
 ])
 const loanStatus = computed(() => [
   { key: 'pending', label: 'รออนุมัติ', value: summary.value.pendingLoans, tone: 'pending' },

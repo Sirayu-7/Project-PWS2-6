@@ -489,7 +489,7 @@ const connectRealtime = () => {
 const logout = () => {
   closeRealtime()
   auth.logout()
-  router.push('/login')
+  window.location.href = '/login'
 }
 
 const onWindowFocus = () => {

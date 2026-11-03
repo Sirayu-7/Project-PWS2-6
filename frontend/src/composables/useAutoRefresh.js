@@ -24,3 +24,4 @@ export function useAutoRefresh(callback) {
     window.removeEventListener('it-equipment:data-refresh', handler)
   })
 }
+
