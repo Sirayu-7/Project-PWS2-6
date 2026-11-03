@@ -223,10 +223,18 @@ import { useAuthStore } from './stores/auth'
 const route = useRoute(), router = useRouter()
 const auth = useAuthStore()
 const isAuthPage = computed(() => route.path === '/login' || !!route.meta?.public)
-const user = computed(() => auth.user || {})
-const userName = computed(() => user.value.name || 'ผู้ใช้งาน')
-const userRole = computed(() => user.value.role || 'ผู้ใช้งานระบบ')
-const isAdmin = computed(() => user.value.role === 'Administrator')
+const user = computed(() => {
+  if (auth.user && auth.user.name) return auth.user
+  try {
+    const raw = localStorage.getItem('it_user')
+    if (raw) return JSON.parse(raw)
+  } catch {}
+  return auth.user || {}
+})
+const userName = computed(() => user.value?.name || auth.userName || 'ผู้ใช้งาน')
+const userRole = computed(() => user.value?.role || auth.role || 'ผู้ใช้งานระบบ')
+const isAdmin = computed(() => userRole.value === 'Administrator')
+const isBorrower = computed(() => userRole.value === 'Borrower')
 const initials = computed(() => (userName.value || 'IT').slice(0, 2).toUpperCase())
 
 const titles = {

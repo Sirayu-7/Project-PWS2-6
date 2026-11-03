@@ -30,9 +30,10 @@ const router = useRouter()
 async function submit() {
   const success = await auth.login(username.value, password.value)
   if (success) {
-    const role = auth.role || auth.user?.role
+    const user = auth.user || JSON.parse(localStorage.getItem('it_user') || '{}')
+    const role = user?.role || auth.role
     const target = role === 'Borrower' ? '/loan' : '/dashboard'
-    window.location.href = target
+    window.location.replace(target)
   }
 }
 </script>

@@ -11,7 +11,8 @@ export const useAuthStore = defineStore('auth', {
   }),
   getters: {
     isAuthenticated: (state) => Boolean(state.token),
-    role: (state) => state.user?.role || null,
+    role: (state) => state.user?.role || JSON.parse(localStorage.getItem('it_user') || '{}')?.role || null,
+    userName: (state) => state.user?.name || JSON.parse(localStorage.getItem('it_user') || '{}')?.name || 'ผู้ใช้งาน',
     can: (state) => (permission) => state.permissions.includes(permission),
     hasPermission: (state) => (permission) => state.permissions.includes(permission),
   },
@@ -22,7 +23,7 @@ export const useAuthStore = defineStore('auth', {
       try {
         const { data } = await api.post('/auth/login', { username, password })
         this.token = data.token
-        this.user = data.user
+        this.user = { ...data.user }
         this.permissions = Array.isArray(data.permissions) ? data.permissions : []
         localStorage.setItem('it_token', data.token)
         localStorage.setItem('it_user', JSON.stringify(data.user))
@@ -68,8 +69,12 @@ export const useAuthStore = defineStore('auth', {
       }
     },
     setUser(user) {
-      this.user = user
-      localStorage.setItem('it_user', JSON.stringify(user))
+      this.user = user ? { ...user } : null
+      if (user) {
+        localStorage.setItem('it_user', JSON.stringify(user))
+      } else {
+        localStorage.removeItem('it_user')
+      }
     },
     logout() {
       this.token = null
