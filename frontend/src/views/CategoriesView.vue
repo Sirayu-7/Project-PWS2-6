@@ -208,7 +208,7 @@ useAutoRefresh(loadCategories)
 
 <style scoped>
 .page {
-  padding: 28px;
+  padding: 0;
   max-width: 1400px;
   margin: auto;
 }
@@ -216,6 +216,7 @@ useAutoRefresh(loadCategories)
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: 16px;
   margin-bottom: 20px;
 }
 .page-head h1 {
@@ -283,6 +284,11 @@ td {
   padding: 12px 14px;
   border-top: 1px solid #eef2f7;
   white-space: nowrap;
+}
+td:nth-child(2) {
+  max-width: 360px;
+  white-space: normal;
+  min-width: 180px;
 }
 .count-pill {
   display: inline-block;
@@ -355,6 +361,8 @@ td {
 }
 .modal {
   width: min(500px, 100%);
+  max-height: calc(100dvh - 32px);
+  overflow-y: auto;
   background: #fff;
   border-radius: 14px;
   padding: 24px;
@@ -403,5 +411,35 @@ td {
   border-radius: 8px;
   padding: 10px 16px;
   cursor: pointer;
+}
+@media (max-width: 640px) {
+  .page-head {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+  }
+  .page-head .primary {
+    width: 100%;
+    text-align: center;
+  }
+  .toolbar {
+    flex-direction: column;
+  }
+  .table-card {
+    padding: 14px;
+  }
+  .modal-backdrop {
+    padding: 12px;
+  }
+  .modal {
+    padding: 18px 16px;
+    max-height: calc(100dvh - 24px);
+  }
+  .modal-actions {
+    flex-wrap: wrap;
+  }
+  .modal-actions > button {
+    flex: 1 1 100%;
+  }
 }
 </style>

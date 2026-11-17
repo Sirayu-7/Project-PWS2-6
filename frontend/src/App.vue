@@ -1,13 +1,15 @@
 <template>
   <RouterView v-if="isAuthPage" />
   <div v-else class="app-shell">
-    <aside class="sidebar">
+    <div v-if="sidebarOpen" class="sidebar-backdrop" @click="sidebarOpen = false"></div>
+    <aside class="sidebar" :class="{ open: sidebarOpen }">
       <div class="brand">
         <img src="/logo.png" alt="Logo" class="sidebar-logo" />
         <div class="brand-copy">
           <strong>IT Equipment</strong>
           <span>Management System</span>
         </div>
+        <button class="sidebar-close" @click="sidebarOpen = false" aria-label="Close menu">×</button>
       </div>
       <div class="nav-label">MAIN MENU</div>
       <nav class="nav">
@@ -57,9 +59,12 @@
 
     <main class="main">
       <header class="topbar">
-        <div class="top-title">
-          <div class="breadcrumb">IT EQUIPMENT / {{ pageTitle.toUpperCase() }}</div>
-          <h2>{{ pageTitle }}</h2>
+        <div class="topbar-left">
+          <button class="menu-toggle icon-button" @click="sidebarOpen = !sidebarOpen" aria-label="Toggle Menu">☰</button>
+          <div class="top-title">
+            <div class="breadcrumb">IT EQUIPMENT / {{ pageTitle.toUpperCase() }}</div>
+            <h2>{{ pageTitle }}</h2>
+          </div>
         </div>
 
         <div class="top-actions">
@@ -298,6 +303,7 @@ const titles = {
 const pageTitle = computed(() => titles[route.path] || 'IT Equipment')
 
 const notifications = ref([]), unread = ref(0), showNotifications = ref(false)
+const sidebarOpen = ref(false)
 const realtime = ref(null), reconnectTimer = ref(null), realtimeStatus = ref('offline')
 const hasNewNotification = ref(false)
 
@@ -386,6 +392,7 @@ async function unlinkLine() {
 }
 
 function openProfileModal() {
+  sidebarOpen.value = false
   profileName.value = user.value.name || ''
   passwords.value = { old_password: '', new_password: '', confirm_password: '' }
   profileSuccess.value = ''
@@ -575,6 +582,7 @@ onMounted(() => {
 })
 
 watch(() => route.path, (newPath) => {
+  sidebarOpen.value = false
   if (newPath !== '/login' && !isAuthPage.value) {
     auth.checkSession()
     loadNotifications()
@@ -629,8 +637,8 @@ onUnmounted(() => {
   z-index: 50;
 }
 .profile-dialog {
-  width: min(520px, calc(100vw - 32px));
-  max-height: min(88vh, 720px);
+  width: min(520px, calc(100vw - 24px));
+  max-height: min(88dvh, 720px);
   display: flex;
   flex-direction: column;
   background: #fff;
@@ -716,6 +724,9 @@ onUnmounted(() => {
   border-bottom: 1px solid #e2e8f0;
   margin-bottom: 12px;
   flex-shrink: 0;
+  overflow-x: auto;
+  white-space: nowrap;
+  -webkit-overflow-scrolling: touch;
 }
 .profile-tabs button {
   border: 0;
@@ -726,6 +737,7 @@ onUnmounted(() => {
   color: #64748b;
   cursor: pointer;
   border-bottom: 2px solid transparent;
+  flex-shrink: 0;
 }
 .profile-tabs button.active {
   color: #2563eb;
@@ -821,6 +833,8 @@ onUnmounted(() => {
   font-size: 12px;
   color: #334155;
   margin-bottom: 12px;
+  max-width: 100%;
+  word-break: break-all;
 }
 .btn-danger-outline {
   border: 1px solid #ef4444;
@@ -1011,8 +1025,37 @@ onUnmounted(() => {
   text-decoration: underline;
 }
 @media (max-width: 480px) {
+  .modal-backdrop {
+    padding: 12px;
+  }
+  .profile-dialog {
+    padding: 18px 16px;
+    max-height: calc(100dvh - 24px);
+  }
+  .profile-tabs button {
+    padding: 8px 12px;
+  }
+  .modal-actions {
+    flex-wrap: wrap;
+  }
+  .modal-actions > button {
+    flex: 1 1 auto;
+    justify-content: center;
+  }
   .channel-body {
     flex-direction: column;
+  }
+  .channel-actions {
+    width: 100%;
+  }
+}
+@media (max-width: 380px) {
+  .channel-id-row {
+    flex-wrap: wrap;
+  }
+  .btn-copy-id {
+    margin-left: 0;
+    width: 100%;
   }
 }
 </style>

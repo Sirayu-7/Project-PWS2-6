@@ -576,7 +576,7 @@ useAutoRefresh(loadEquipment)
 
 <style scoped>
 .page {
-  padding: 28px;
+  padding: 0;
   max-width: 1500px;
   margin: auto;
 }
@@ -584,6 +584,7 @@ useAutoRefresh(loadEquipment)
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: 16px;
   margin-bottom: 20px;
 }
 .page-head h1 {
@@ -609,7 +610,7 @@ useAutoRefresh(loadEquipment)
 }
 .toolbar {
   display: grid;
-  grid-template-columns: 1fr 180px 180px;
+  grid-template-columns: 1fr 200px 200px;
   gap: 10px;
   margin-bottom: 16px;
 }
@@ -747,11 +748,11 @@ td {
 }
 .modal {
   width: min(650px, 100%);
-  max-height: 90vh;
+  max-height: calc(100dvh - 32px);
   overflow: auto;
   background: #fff;
   border-radius: 14px;
-  padding: 24px;
+  padding: 20px;
   box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
 }
 .detail-modal {
@@ -761,6 +762,7 @@ td {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
+  gap: 12px;
   margin-bottom: 16px;
 }
 .modal-head h2 {
@@ -784,6 +786,9 @@ td {
   gap: 8px;
   border-bottom: 1px solid #e2e8f0;
   margin-bottom: 16px;
+  overflow-x: auto;
+  white-space: nowrap;
+  -webkit-overflow-scrolling: touch;
 }
 .tabs button {
   border: 0;
@@ -794,6 +799,7 @@ td {
   color: #64748b;
   cursor: pointer;
   border-bottom: 2px solid transparent;
+  flex-shrink: 0;
 }
 .tabs button.active {
   color: #2563eb;
@@ -882,10 +888,15 @@ td {
   padding: 10px 16px;
   cursor: pointer;
 }
-@media (max-width: 700px) {
+@media (max-width: 860px) {
   .toolbar {
-    grid-template-columns: 1fr;
+    grid-template-columns: 1fr 1fr;
   }
+  .toolbar input {
+    grid-column: 1 / -1;
+  }
+}
+@media (max-width: 700px) {
   .form-grid {
     grid-template-columns: 1fr;
   }
@@ -895,10 +906,45 @@ td {
   .detail-grid {
     grid-template-columns: 1fr;
   }
+}
+@media (max-width: 640px) {
   .page-head {
-    align-items: flex-start;
-    gap: 10px;
     flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+  }
+  .page-head .primary {
+    width: 100%;
+    text-align: center;
+  }
+  .table-card {
+    padding: 14px;
+  }
+}
+@media (max-width: 540px) {
+  .toolbar {
+    grid-template-columns: 1fr;
+  }
+  .toolbar input {
+    grid-column: auto;
+  }
+  .modal-footer-actions,
+  .modal-actions {
+    flex-wrap: wrap;
+  }
+  .modal-footer-actions > button,
+  .modal-actions > button {
+    flex: 1 1 100%;
+    text-align: center;
+  }
+}
+@media (max-width: 480px) {
+  .modal-backdrop {
+    padding: 12px;
+  }
+  .modal {
+    padding: 16px;
+    max-height: calc(100dvh - 24px);
   }
 }
 </style>

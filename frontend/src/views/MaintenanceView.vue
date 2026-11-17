@@ -358,7 +358,7 @@ useAutoRefresh(load)
 
 <style scoped>
 .page {
-  padding: 28px;
+  padding: 0;
   max-width: 1500px;
   margin: auto;
 }
@@ -366,6 +366,7 @@ useAutoRefresh(load)
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: 16px;
   margin-bottom: 22px;
 }
 .head h1 {
@@ -421,7 +422,7 @@ useAutoRefresh(load)
 table {
   width: 100%;
   border-collapse: collapse;
-  min-width: 1100px;
+  min-width: 860px;
 }
 th,
 td {
@@ -548,7 +549,7 @@ td small {
 .modal {
   position: relative;
   width: min(580px, 100%);
-  max-height: 90vh;
+  max-height: calc(100dvh - 32px);
   overflow: auto;
   background: #fff;
   border-radius: 16px;
@@ -628,6 +629,8 @@ td small {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
   margin-bottom: 6px;
 }
 .timeline-header small {
@@ -650,14 +653,37 @@ td small {
   margin-top: 20px;
 }
 @media (max-width: 700px) {
-  .page {
-    padding: 18px;
+  .head {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+  }
+  .head .primary {
+    width: 100%;
   }
   .filters {
     flex-wrap: wrap;
   }
   .filters input {
-    flex-basis: 100%;
+    flex: 1 1 100%;
+  }
+  .filters select {
+    flex: 1 1 calc(50% - 6px);
+  }
+  .filters button {
+    flex: 1 1 100%;
+  }
+}
+@media (max-width: 480px) {
+  .filters select {
+    flex: 1 1 100%;
+  }
+  .overlay {
+    padding: 12px;
+  }
+  .modal {
+    padding: 20px 16px;
+    max-height: calc(100dvh - 24px);
   }
 }
 </style>

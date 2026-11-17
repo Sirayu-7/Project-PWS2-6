@@ -445,7 +445,7 @@ useAutoRefresh(loadAll)
 
 <style scoped>
 .page {
-  padding: 28px;
+  padding: 0;
   max-width: 1500px;
   margin: auto;
 }
@@ -453,6 +453,7 @@ useAutoRefresh(loadAll)
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: 16px;
   margin-bottom: 22px;
 }
 .head h1 {
@@ -494,6 +495,9 @@ useAutoRefresh(loadAll)
   gap: 8px;
   border-bottom: 1px solid #e2e8f0;
   margin: 20px 0 16px;
+  overflow-x: auto;
+  white-space: nowrap;
+  -webkit-overflow-scrolling: touch;
 }
 .report-nav button {
   border: 0;
@@ -504,6 +508,7 @@ useAutoRefresh(loadAll)
   color: #64748b;
   cursor: pointer;
   border-bottom: 3px solid transparent;
+  flex-shrink: 0;
 }
 .report-nav button.active {
   color: #2563eb;
@@ -563,6 +568,7 @@ useAutoRefresh(loadAll)
   border: 1px solid #e2e8f0;
   border-radius: 14px;
   padding: 20px;
+  min-width: 0;
 }
 .card h2 {
   margin: 0 0 14px;
@@ -703,10 +709,21 @@ td small {
     grid-template-columns: repeat(3, 1fr);
   }
 }
-@media (max-width: 700px) {
-  .page {
-    padding: 18px;
+@media (max-width: 768px) {
+  .filters label {
+    flex: 1 1 calc(50% - 8px);
+    min-width: 140px;
   }
+  .filters input,
+  .filters select {
+    width: 100%;
+    box-sizing: border-box;
+  }
+  .filters .btn {
+    flex: 1 1 auto;
+  }
+}
+@media (max-width: 700px) {
   .head,
   .filters {
     flex-wrap: wrap;
@@ -716,6 +733,32 @@ td small {
   }
   .grid {
     grid-template-columns: 1fr;
+  }
+}
+@media (max-width: 480px) {
+  .head {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+  }
+  .head .actions {
+    width: 100%;
+  }
+  .head .actions button {
+    flex: 1;
+  }
+  .filters label {
+    flex: 1 1 100%;
+  }
+  .stats {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+  }
+  .stat {
+    padding: 14px;
+  }
+  .stat b {
+    font-size: 20px;
   }
 }
 @media print {

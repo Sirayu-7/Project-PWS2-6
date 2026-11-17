@@ -39,7 +39,7 @@ async function submit() {
 </script>
 
 <style scoped>
-.login-page{min-height:100vh;display:grid;place-items:center;background:linear-gradient(135deg,#eff6ff,#f8fafc);padding:20px}
+.login-page{min-height:100vh;min-height:100dvh;display:grid;place-items:center;background:linear-gradient(135deg,#eff6ff,#f8fafc);padding:16px}
 .login-card{width:min(420px,100%);background:#fff;border:1px solid #e2e8f0;border-radius:18px;padding:34px;box-shadow:0 20px 50px rgba(15,23,42,.08)}
 .login-brand{text-align:center;margin-bottom:28px}
 .login-brand .brand-logo{margin:0 auto 12px;width:72px;height:72px;object-fit:contain;display:block;border-radius:14px}
@@ -53,4 +53,5 @@ async function submit() {
 .login-btn:disabled{opacity:.6;cursor:not-allowed}
 .error{background:#fef2f2;color:#b91c1c;border-radius:8px;padding:10px;font-size:12px}
 .login-note{text-align:center;margin:22px 0 0}
+@media (max-width:480px){.login-card{padding:24px 18px}.login-brand{margin-bottom:20px}.login-brand .brand-logo{width:60px;height:60px}}
 </style>

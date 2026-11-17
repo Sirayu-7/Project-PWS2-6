@@ -143,5 +143,96 @@ onBeforeUnmount(() => window.removeEventListener('it-equipment:data-refresh', re
 </script>
 
 <style scoped>
-.dashboard{display:grid;gap:18px}.page-header{display:flex;justify-content:space-between;align-items:end;gap:20px}.eyebrow{font-size:10px;font-weight:700;color:#2563eb;letter-spacing:.08em}.page-header h1{margin:3px 0 5px;font-size:24px}.page-header p{font-size:13px}.header-actions{display:flex;align-items:center;gap:12px}.updated{font-size:10px;color:#8a96a8}.btn.primary{background:#2563eb;color:#fff;border-color:#2563eb}.btn:disabled{opacity:.6;cursor:not-allowed}.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:15px}.stat-card{background:#fff;border:1px solid #e6eaf0;border-radius:14px;padding:18px;display:flex;align-items:center;gap:14px;box-shadow:0 2px 9px rgba(15,23,42,.025)}.stat-card span,.stat-card small{display:block;color:#7b8798;font-size:11px}.stat-card strong{display:inline-block;font-size:25px;margin:2px 6px 0 0}.stat-icon,.quick-icon{width:44px;height:44px;border-radius:12px;display:grid;place-items:center;font-size:19px;font-weight:700;flex:none}.blue{background:#eff6ff;color:#2563eb}.green{background:#ecfdf3;color:#16a34a}.orange{background:#fff7ed;color:#ea580c}.red{background:#fef2f2;color:#dc2626}.purple{background:#f5f3ff;color:#7c3aed}.dashboard-grid,.data-grid{display:grid;grid-template-columns:1.35fr 1fr;gap:18px}.card-title{display:flex;justify-content:space-between;align-items:flex-start;gap:15px;margin-bottom:18px}.card-title h3{margin:0;font-size:16px}.card-title p{margin:3px 0 0;font-size:11px;color:#7b8798}.text-link{font-size:11px;color:#2563eb;text-decoration:none;white-space:nowrap}.loan-status-grid{display:grid;grid-template-columns:repeat(5,1fr);border:1px solid #edf0f4;border-radius:10px;overflow:hidden}.status-box{padding:14px 10px;display:flex;gap:8px;align-items:flex-start}.status-box+.status-box{border-left:1px solid #edf0f4}.status-box label{display:block;font-size:10px;color:#66758a;white-space:nowrap}.status-box strong{font-size:20px}.dot{width:8px;height:8px;border-radius:50%;margin-top:5px;flex:none}.pending{background:#f59e0b}.approved{background:#6366f1}.borrowed{background:#2563eb}.overdue{background:#ef4444}.returned{background:#16a34a}.loan-total{margin-top:16px;padding-top:14px;border-top:1px solid #edf0f4;display:flex;justify-content:space-between;font-size:11px;color:#66758a}.loan-total strong{color:#172033;font-size:14px}.maintenance-status-grid{display:grid;gap:12px}.repair-row>div:first-child{display:flex;justify-content:space-between;font-size:10px;color:#66758a;margin-bottom:6px}.repair-row strong{color:#172033}.bar{height:7px;background:#eef2f7;border-radius:99px;overflow:hidden}.bar i{display:block;height:100%;background:#2563eb;border-radius:99px}.page-card{background:#fff;border:1px solid #e6eaf0;border-radius:14px;padding:20px;box-shadow:0 2px 9px rgba(15,23,42,.025)}.table-wrap{overflow:auto}.table-wrap table{width:100%;border-collapse:collapse;font-size:10px}.table-wrap th{text-align:left;color:#7b8798;font-size:9px;font-weight:700;padding:8px;border-bottom:1px solid #e9edf2}.table-wrap td{padding:10px 8px;border-bottom:1px solid #f0f2f5;white-space:nowrap}.table-wrap td strong,.table-wrap td small{display:block}.table-wrap td small{font-size:9px;color:#8b96a7;margin-top:2px}.badge{display:inline-flex;padding:4px 8px;border-radius:99px;font-size:9px;font-weight:700;background:#eef2f7;color:#475569}.badge.success{background:#ecfdf3;color:#15803d}.badge.warning{background:#fff7ed;color:#c2410c}.badge.danger{background:#fef2f2;color:#dc2626}.badge.info{background:#eff6ff;color:#1d4ed8}.empty{min-height:150px;display:grid;place-items:center;color:#9aa5b5;font-size:11px}.quick-card{padding-bottom:18px}.quick-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:11px}.quick-item{display:flex;align-items:center;gap:10px;padding:13px;border:1px solid #e9edf2;border-radius:11px;text-decoration:none;color:#172033;background:#fff}.quick-item:hover{border-color:#cbd8ee;background:#f8fbff}.quick-item div{min-width:0;flex:1}.quick-item strong,.quick-item small{display:block}.quick-item strong{font-size:11px}.quick-item small{font-size:9px;color:#8995a7;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.quick-item b{color:#9aa5b5;font-size:14px}.quick-icon{width:36px;height:36px;border-radius:9px;font-size:15px}@media(max-width:1100px){.stats-grid{grid-template-columns:repeat(2,1fr)}.dashboard-grid,.data-grid{grid-template-columns:1fr}.quick-grid{grid-template-columns:repeat(2,1fr)}}@media(max-width:650px){.stats-grid,.quick-grid{grid-template-columns:1fr}.page-header{align-items:flex-start;flex-direction:column}.loan-status-grid{grid-template-columns:repeat(2,1fr)}.status-box+.status-box{border-left:0}.status-box:nth-child(n+3){border-top:1px solid #edf0f4}.header-actions{width:100%;justify-content:space-between}}
+.dashboard{display:grid;gap:18px}
+.page-header{display:flex;justify-content:space-between;align-items:end;gap:20px}
+.eyebrow{font-size:10px;font-weight:700;color:#2563eb;letter-spacing:.08em}
+.page-header h1{margin:3px 0 5px;font-size:24px}
+.page-header p{font-size:13px}
+.header-actions{display:flex;align-items:center;gap:12px}
+.updated{font-size:10px;color:#8a96a8}
+.btn.primary{background:#2563eb;color:#fff;border-color:#2563eb}
+.btn:disabled{opacity:.6;cursor:not-allowed}
+.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:15px}
+.stat-card{background:#fff;border:1px solid #e6eaf0;border-radius:14px;padding:18px;display:flex;align-items:center;gap:14px;box-shadow:0 2px 9px rgba(15,23,42,.025);min-width:0}
+.stat-card span,.stat-card small{display:block;color:#7b8798;font-size:11px}
+.stat-card strong{display:inline-block;font-size:25px;margin:2px 6px 0 0}
+.stat-icon,.quick-icon{width:44px;height:44px;border-radius:12px;display:grid;place-items:center;font-size:19px;font-weight:700;flex:none}
+.blue{background:#eff6ff;color:#2563eb}
+.green{background:#ecfdf3;color:#16a34a}
+.orange{background:#fff7ed;color:#ea580c}
+.red{background:#fef2f2;color:#dc2626}
+.purple{background:#f5f3ff;color:#7c3aed}
+.dashboard-grid,.data-grid{display:grid;grid-template-columns:1.35fr 1fr;gap:18px}
+.dashboard-grid>*,.data-grid>*{min-width:0}
+.card-title{display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:8px 15px;margin-bottom:18px}
+.card-title h3{margin:0;font-size:16px}
+.card-title p{margin:3px 0 0;font-size:11px;color:#7b8798}
+.text-link{font-size:11px;color:#2563eb;text-decoration:none;white-space:nowrap}
+.loan-status-grid{display:grid;grid-template-columns:repeat(5,1fr);border:1px solid #edf0f4;border-radius:10px;overflow:hidden}
+.status-box{padding:14px 10px;display:flex;gap:8px;align-items:flex-start;min-width:0}
+@media(min-width:901px){
+  .status-box+.status-box{border-left:1px solid #edf0f4}
+}
+.status-box label{display:block;font-size:10px;color:#66758a;white-space:nowrap}
+.status-box strong{font-size:20px}
+.dot{width:8px;height:8px;border-radius:50%;margin-top:5px;flex:none}
+.pending{background:#f59e0b}
+.approved{background:#6366f1}
+.borrowed{background:#2563eb}
+.overdue{background:#ef4444}
+.returned{background:#16a34a}
+.loan-total{margin-top:16px;padding-top:14px;border-top:1px solid #edf0f4;display:flex;justify-content:space-between;font-size:11px;color:#66758a}
+.loan-total strong{color:#172033;font-size:14px}
+.maintenance-status-grid{display:grid;gap:12px}
+.repair-row>div:first-child{display:flex;justify-content:space-between;font-size:10px;color:#66758a;margin-bottom:6px}
+.repair-row strong{color:#172033}
+.bar{height:7px;background:#eef2f7;border-radius:99px;overflow:hidden}
+.bar i{display:block;height:100%;background:#2563eb;border-radius:99px}
+.page-card{background:#fff;border:1px solid #e6eaf0;border-radius:14px;padding:20px;box-shadow:0 2px 9px rgba(15,23,42,.025);min-width:0}
+.table-wrap{overflow:auto}
+.table-wrap table{width:100%;border-collapse:collapse;font-size:10px}
+.table-wrap th{text-align:left;color:#7b8798;font-size:9px;font-weight:700;padding:8px;border-bottom:1px solid #e9edf2}
+.table-wrap td{padding:10px 8px;border-bottom:1px solid #f0f2f5;white-space:nowrap}
+.table-wrap td strong,.table-wrap td small{display:block}
+.table-wrap td small{font-size:9px;color:#8b96a7;margin-top:2px}
+.badge{display:inline-flex;padding:4px 8px;border-radius:99px;font-size:9px;font-weight:700;background:#eef2f7;color:#475569}
+.badge.success{background:#ecfdf3;color:#15803d}
+.badge.warning{background:#fff7ed;color:#c2410c}
+.badge.danger{background:#fef2f2;color:#dc2626}
+.badge.info{background:#eff6ff;color:#1d4ed8}
+.empty{min-height:150px;display:grid;place-items:center;color:#9aa5b5;font-size:11px}
+.quick-card{padding-bottom:18px}
+.quick-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:11px}
+.quick-item{display:flex;align-items:center;gap:10px;padding:13px;border:1px solid #e9edf2;border-radius:11px;text-decoration:none;color:#172033;background:#fff;min-width:0}
+.quick-item:hover{border-color:#cbd8ee;background:#f8fbff}
+.quick-item div{min-width:0;flex:1}
+.quick-item strong,.quick-item small{display:block}
+.quick-item strong{font-size:11px}
+.quick-item small{font-size:9px;color:#8995a7;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.quick-item b{color:#9aa5b5;font-size:14px}
+.quick-icon{width:36px;height:36px;border-radius:9px;font-size:15px}
+@media(max-width:1100px){
+  .stats-grid{grid-template-columns:repeat(2,1fr)}
+  .dashboard-grid,.data-grid{grid-template-columns:1fr}
+  .quick-grid{grid-template-columns:repeat(2,1fr)}
+}
+@media(max-width:900px) and (min-width:561px){
+  .loan-status-grid{grid-template-columns:repeat(3,1fr)}
+  .status-box:nth-child(3n+2),.status-box:nth-child(3n+3){border-left:1px solid #edf0f4}
+  .status-box:nth-child(n+4){border-top:1px solid #edf0f4}
+}
+@media(max-width:650px){
+  .quick-grid{grid-template-columns:1fr}
+  .page-header{align-items:flex-start;flex-direction:column}
+  .header-actions{width:100%;justify-content:space-between}
+}
+@media(max-width:560px){
+  .loan-status-grid{grid-template-columns:repeat(2,1fr)}
+  .status-box:nth-child(even){border-left:1px solid #edf0f4}
+  .status-box:nth-child(n+3){border-top:1px solid #edf0f4}
+}
+@media(max-width:480px){
+  .stats-grid{grid-template-columns:1fr}
+  .stat-card{padding:14px}
+}
 </style>

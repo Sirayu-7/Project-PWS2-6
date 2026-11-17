@@ -326,7 +326,7 @@ useAutoRefresh(load)
 
 <style scoped>
 .page {
-  padding: 28px;
+  padding: 0;
   max-width: 1500px;
   margin: auto;
 }
@@ -334,6 +334,7 @@ useAutoRefresh(load)
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: 16px;
   margin-bottom: 22px;
 }
 .head h1 {
@@ -385,7 +386,7 @@ useAutoRefresh(load)
 table {
   width: 100%;
   border-collapse: collapse;
-  min-width: 1100px;
+  min-width: 820px;
 }
 th,
 td {
@@ -500,7 +501,7 @@ td small {
 .modal {
   position: relative;
   width: min(560px, 100%);
-  max-height: 90vh;
+  max-height: calc(100dvh - 32px);
   overflow: auto;
   background: #fff;
   border-radius: 16px;
@@ -571,18 +572,38 @@ td small {
   gap: 10px;
 }
 @media (max-width: 700px) {
-  .page {
-    padding: 18px;
-  }
   .head {
-    align-items: flex-start;
+    flex-direction: column;
+    align-items: stretch;
     gap: 12px;
+  }
+  .head .primary {
+    width: 100%;
   }
   .filters {
     flex-wrap: wrap;
   }
   .filters input {
-    flex-basis: 100%;
+    flex: 1 1 100%;
+  }
+  .filters select {
+    flex: 1 1 160px;
+  }
+  .filters .btn {
+    flex: 0 0 auto;
+  }
+}
+@media (max-width: 480px) {
+  .filters select,
+  .filters .btn {
+    flex: 1 1 100%;
+  }
+  .overlay {
+    padding: 12px;
+  }
+  .modal {
+    padding: 20px 16px;
+    max-height: calc(100dvh - 24px);
   }
 }
 </style>
