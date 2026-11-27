@@ -1,139 +1,217 @@
-# IT Equipment Management System (ระบบจัดการอุปกรณ์ IT)
+# ระบบยืม-คืนและแจ้งซ่อมอุปกรณ์ไอทีสาขาเทคโนโลยีสารสนเทศ
 
-ระบบบริหารจัดการอุปกรณ์ IT ครบวงจร ทั้งการบันทึกข้อมูลอุปกรณ์ เบิก-ยืม-คืน ตรวจเช็ค ซ่อมบำรุง การแจ้งเตือน และระบบ Audit Log รองรับการแบ่งสิทธิ์ผู้ใช้งาน (Administrator, Staff, Borrower)
+ระบบเว็บสำหรับบริหารจัดการอุปกรณ์เทคโนโลยีสารสนเทศ ครอบคลุมทะเบียนอุปกรณ์ หมวดหมู่ การยืม-คืน การแจ้งและติดตามงานซ่อม บัญชีผู้ใช้ สิทธิ์การใช้งาน รายงาน และ Dashboard
 
----
+เว็บไซต์ตัวอย่าง: https://project-pws-2-6.vercel.app
 
-## 🛠 สิ่งที่ต้องมีในเครื่องใหม่ (Prerequisites)
+## ความสามารถหลัก
 
-1. **Node.js** (เวอร์ชัน 18.0 ขึ้นไป) -> ดาวน์โหลดได้ที่ [nodejs.org](https://nodejs.org/)
-2. **MySQL / MariaDB** (แนะนำให้ติดตั้ง **XAMPP**) -> ดาวน์โหลดได้ที่ [apachefriends.org](https://www.apachefriends.org/)
+- **Authentication & Authorization**: ล็อกอินด้วย JWT แยกสิทธิ์ตามบทบาท และจัดการโปรไฟล์
+- **จัดการอุปกรณ์**: เพิ่ม แก้ไข ลบ ค้นหา ดูรายละเอียด และติดตามประวัติอุปกรณ์
+- **จัดการหมวดหมู่**: จัดการหมวดหมู่พร้อมนับจำนวนอุปกรณ์ในแต่ละหมวด
+- **การยืม-คืน**: ส่งคำขอยืม อนุมัติ/ปฏิเสธ บันทึกการคืน ตรวจสภาพ และตรวจรายการค้างคืน
+- **งานซ่อมบำรุง**: แจ้งปัญหา มอบหมายช่าง บันทึกค่าใช้จ่ายและวิธีแก้ไข และติดตามสถานะงาน
+- **Dashboard & Reports**: แสดง KPI รายงานการยืม-คืน งานซ่อม และอุปกรณ์ พร้อมส่งออก CSV และหน้าสำหรับพิมพ์
+- **แจ้งเตือนผ่าน LINE**: เชื่อมบัญชีกับ LINE และส่งข้อความแจ้งเตือน/ตอบคำสั่งผ่าน LINE Messaging API
+- **Audit Log**: บันทึกการเข้าสู่ระบบและกิจกรรมสำคัญของผู้ใช้งาน
 
----
+## เทคโนโลยีที่ใช้
 
-## 🚀 วิธีเปิดใช้งานในเครื่องใหม่ (Quick Start)
+| ส่วน | เทคโนโลยี |
+| :--- | :--- |
+| Frontend | Vue 3, Vite, Pinia, Vue Router, Axios |
+| Backend | Node.js, Express 5 |
+| Database | MySQL / MariaDB |
+| Authentication | JWT, bcryptjs |
+| Notification | LINE Messaging API |
 
-### วิธีที่ง่ายที่สุด (คลิกเดียวจบสำหรับ Windows)
-1. เปิดโปรแกรม **XAMPP Control Panel** แล้วกดปุ่ม **[Start]** ที่ **MySQL**
-2. ดับเบิ้ลคลิกไฟล์ **`start.bat`** (หรือคลิกขวา `start.ps1` -> Run with PowerShell)
-3. ระบบจะจัดการทุกอย่างให้อัตโนมัติ:
-   - ตรวจหาโปรแกรม Node.js ในเครื่อง
-   - สร้างไฟล์คอนฟิก `.env` ให้ทั้ง Backend และ Frontend อัตโนมัติ (หากยังไม่มี)
-   - ติดตั้ง dependencies (`npm install`) ให้อัตโนมัติ (หากยังไม่มี `node_modules`)
-   - ตรวจสอบ MySQL และสร้างฐานข้อมูล `it_equipment_db` พร้อมสร้างตารางและข้อมูลเริ่มต้นให้ทันที (ไม่ต้อง Import เอง!)
-   - สตาร์ท Backend และ Frontend พร้อมเปิดเบราว์เซอร์เข้าสู่ระบบให้ทันที
+## บทบาทผู้ใช้งาน
 
----
+| บทบาท | สิทธิ์และหน้าที่หลัก |
+| :--- | :--- |
+| **Administrator** | ดูแลผู้ใช้ สิทธิ์ หมวดหมู่ อุปกรณ์ การยืม-คืน งานซ่อม รายงาน และการตั้งค่าระบบ |
+| **Staff** | ดูแลอุปกรณ์ อนุมัติการยืม รับคืน และดำเนินงานซ่อมบำรุง |
+| **Borrower** | ดูอุปกรณ์ ส่งคำขอยืม ติดตามสถานะการยืม-คืน และแจ้งปัญหาซ่อม |
 
-## 💻 วิธีเปิดใช้งานผ่าน Terminal / Command Line
+## บัญชีทดสอบ
 
-หากต้องการรันด้วยคำสั่งผ่าน VS Code หรือ Terminal:
+| Role | Username | Password |
+| :--- | :--- | :--- |
+| Administrator | `admin` | `Admin@1234` |
+| Staff | `staff` | `Staff@1234` |
+| Borrower | `borrower` | `Borrower@1234` |
 
-1. **ติดตั้ง dependencies และตั้งค่าฐานข้อมูลอัตโนมัติ:**
-   ```bash
-   npm run setup
-   ```
-   *(คำสั่งนี้จะรัน npm install ทั้งโปรเจกต์ และสร้าง Database พร้อม seed ข้อมูลให้อัตโนมัติ)*
+> ใช้เฉพาะในสภาพแวดล้อมพัฒนา ไม่ควรใช้รหัสผ่านเริ่มต้นนี้ในระบบจริง
 
-2. **เปิดระบบแยกตามโฟลเดอร์:**
-   - **Backend:**
-     ```bash
-     cd backend
-     npm run dev
-     ```
-     *(ทำงานที่ http://localhost:3000)*
-   
-   - **Frontend:**
-     ```bash
-     cd frontend
-     npm run dev
-     ```
-     *(ทำงานที่ http://localhost:5173)*
+## สิ่งที่ต้องติดตั้ง
 
----
+- **Node.js 18 หรือใหม่กว่า**
+- **MySQL หรือ MariaDB** แนะนำ XAMPP สำหรับใช้งานบน Windows
+- **npm** ที่ติดตั้งมาพร้อม Node.js
 
-## 🛑 วิธีปิดการทำงานของระบบ
+## เริ่มใช้งานอย่างรวดเร็วบน Windows
 
-- ดับเบิ้ลคลิกไฟล์ **`stop.bat`** หรือรัน **`.\stop.ps1`** ระบบจะเคลียร์และปิดเซิร์ฟเวอร์ทั้ง Port 3000 และ 5173 ให้อัตโนมัติ
+1. เปิด XAMPP Control Panel แล้วกด **Start** ที่ MySQL
+2. ดับเบิลคลิก `start.bat` หรือคลิกขวาที่ `start.ps1` แล้วเลือก **Run with PowerShell**
+3. สคริปต์จะติดตั้ง dependencies สร้างไฟล์ `.env` เริ่มต้น และเตรียมฐานข้อมูลอัตโนมัติ
+4. ระบบจะเปิด Backend ที่ `http://localhost:3000` และ Frontend ที่ `http://localhost:5173`
 
----
+## เริ่มใช้งานด้วย Terminal
 
-## 🔑 บัญชีทดสอบระบบ (Default Demo Accounts)
+จากโฟลเดอร์หลักของโปรเจกต์:
 
-| สิทธิ์ (Role) | Username | Password | รายละเอียดการใช้งาน |
-| :--- | :--- | :--- | :--- |
-| **Administrator** | `admin` | `Admin@1234` | สิทธิ์สูงสุด ดูแลผู้ใช้งาน หมวดหมู่ อุปกรณ์ และระบบทั้งหมด |
-| **Staff** | `staff` | `Staff@1234` | เจ้าหน้าที่ดูแลอุปกรณ์ จัดการยืม-คืน บันทึกซ่อมบำรุง |
-| **Borrower** | `borrower` | `Borrower@1234` | ผู้ใช้ทั่วไป (เช่น พนักงาน) ทำเรื่องขอยืมและดูประวัติของตนเอง |
+```bash
+npm run setup
+```
 
----
+คำสั่งนี้จะ:
 
-## ⚙️ การตั้งค่าระบบ (Configuration)
+1. ติดตั้ง dependencies ของทั้ง Backend และ Frontend
+2. สร้างหรืออัปเดตฐานข้อมูล `it_equipment_db`
+3. เพิ่มข้อมูลเริ่มต้นและบัญชีทดสอบ
 
-หากต้องการเปลี่ยนพอร์ตหรือการเชื่อมต่อ MySQL สามารถแก้ไขได้ที่ไฟล์:
-- **`backend/.env`**
-  ```env
-  PORT=3000
-  DB_HOST=127.0.0.1
-  DB_PORT=3306
-  DB_NAME=it_equipment_db
-  DB_USER=root
-  DB_PASSWORD=
-  JWT_SECRET=it-equipment-project-change-this-secret
+จากนั้นรันระบบแยกเทอร์มินัล:
 
-  # LINE Messaging API Configuration
-  LINE_CHANNEL_ID=your_channel_id
-  LINE_CHANNEL_SECRET=your_channel_secret
-  LINE_CHANNEL_ACCESS_TOKEN=your_channel_access_token_here
-  LINE_BOT_BASIC_ID=@yourbotid
-  LINE_STAFF_GROUP_ID=
-  ```
-- **`frontend/.env`**
-  ```env
-  VITE_API_URL=http://localhost:3000/api
-  ```
+```bash
+npm run dev:backend
+npm run dev:frontend
+```
 
----
+หรือรันด้วยคำสั่งย่อยในแต่ละโฟลเดอร์:
 
-## 📱 การตั้งค่า LINE Messaging API & Webhook
+```bash
+cd backend
+npm run dev
 
-ระบบรองรับการเชื่อมต่อกับ **LINE Official Account (LINE Bot)** แบบ 2 ทาง (แจ้งเตือน + โต้ตอบ + อนุมัติ/ปฏิเสธคำขอ):
+cd frontend
+npm run dev
+```
 
-1. **ตั้งค่า Webhook URL ใน LINE Developers Console:**
-   - ไปที่แท็บ **Messaging API**
-   - ในหัวข้อ **Webhook settings** ใส่ URL:
-     `https://<โดเมนของคุณ>/api/line/webhook`
-     *(สำหรับการทดสอบในเครื่อง Dev สามารถใช้โปรแกรมจำลอง เช่น ngrok / Cloudflare Tunnel เช่น `https://xxxx.ngrok-free.app/api/line/webhook`)*
-   - กดปุ่ม **Verify** และเปิดสวิตช์ **Use webhook** เป็น **ON**
-2. **การออก Channel Access Token:**
-   - ในแท็บ **Messaging API** เลื่อนลงมาที่หัวข้อ **Channel access token (long-lived)**
-   - กดปุ่ม **Issue** แล้วนำค่า Token มาใส่ใน `backend/.env` ที่ตัวแปร `LINE_CHANNEL_ACCESS_TOKEN`
-3. **การผูกบัญชีผู้ใช้ (Account Linking):**
-   - ผู้ใช้งานล็อกอินเข้าสู่ระบบผ่านเว็บ -> กดที่โปรไฟล์ที่มุมขวาบน หรือที่แถบเมนูด้านล่างซ้าย
-   - เลือกแท็บ **"การเชื่อมต่อ LINE"** แล้วกดปุ่ม **"ขอรหัสเชื่อมต่อ LINE (PIN)"**
-   - นำรหัส PIN 6 หลักที่ได้ไปส่งในแชทของ LINE Official Account ระบบจะทำการเชื่อมโยงบัญชีและเริ่มส่งการแจ้งเตือนทันที!
+## ปิดระบบ
 
----
+บน Windows:
 
-## 📁 โครงสร้างโปรเจกต์ (Project Structure)
+```bat
+stop.bat
+```
+
+หรือรันผ่าน PowerShell:
+
+```powershell
+.\stop.ps1
+```
+
+## การตั้งค่า Environment
+
+คัดลอกไฟล์ตัวอย่างและแก้ไขค่าตามสภาพแวดล้อม:
+
+```bash
+cp backend/.env.example backend/.env
+cp frontend/.env.example frontend/.env
+```
+
+### Backend — `backend/.env`
+
+```dotenv
+PORT=3000
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_NAME=it_equipment_db
+DB_USER=root
+DB_PASSWORD=
+JWT_SECRET=เปลี่ยนเป็นคีย์ลับที่สุ่มและเก็บเป็นความลับ
+
+LINE_CHANNEL_ID=your_channel_id
+LINE_CHANNEL_SECRET=your_channel_secret
+LINE_CHANNEL_ACCESS_TOKEN=your_channel_access_token_here
+LINE_BOT_BASIC_ID=@yourbotid
+LINE_STAFF_GROUP_ID=
+```
+
+### Frontend — `frontend/.env`
+
+```dotenv
+VITE_API_URL=http://localhost:3000/api
+```
+
+## การตั้งค่า LINE Messaging API
+
+1. สร้าง LINE Official Account และ Messaging API channel ใน LINE Developers Console
+2. ตั้งค่า `LINE_CHANNEL_ID`, `LINE_CHANNEL_SECRET`, `LINE_CHANNEL_ACCESS_TOKEN`, `LINE_BOT_BASIC_ID` และ `LINE_STAFF_GROUP_ID` ใน `backend/.env`
+3. ตั้งค่า Webhook URL เป็น:
 
 ```text
-├── backend/            # Express.js REST API + WebSocket/Realtime + MySQL connection
-│   ├── scripts/        # สคริปต์ init-db.js และ Seed ข้อมูล
-│   ├── src/            # Controllers, Routes, Middleware, Services
-│   ├── .env.example    # ไฟล์ตัวอย่าง Environment variables
+https://<โดเมนหรือ-tunnel>/api/line/webhook
+```
+
+4. เปิด **Use webhook** ใน Messaging API และกด **Verify** เพื่อทดสอบ
+5. ผู้ใช้ล็อกอินเว็บ เข้าสู่หน้าโปรไฟล์ เลือกเชื่อมต่อ LINE และขอ PIN 6 หลัก
+6. ส่ง PIN 6 หลักไปที่ LINE Official Account เพื่อผูกบัญชี
+
+สำหรับทดสอบบนเครื่องสามารถเปิด public tunnel ด้วย:
+
+```bat
+run-tunnel.bat
+```
+
+## คำสั่งที่มีอยู่
+
+จากโฟลเดอร์หลัก:
+
+| คำสั่ง | การทำงาน |
+| :--- | :--- |
+| `npm run setup` | ติดตั้ง dependencies และเตรียมฐานข้อมูล |
+| `npm run install:all` | ติดตั้ง dependencies ทั้ง Backend และ Frontend |
+| `npm run init:db` | สร้าง/อัปเดตฐานข้อมูลและข้อมูลเริ่มต้น |
+| `npm run dev:backend` | รัน Backend โหมด watch |
+| `npm run dev:frontend` | รัน Frontend ด้วย Vite |
+| `npm run build` | สร้างไฟล์ Frontend สำหรับ Production |
+| `npm start` | เปิดระบบผ่านสคริปต์ Windows |
+| `npm run stop` | ปิดระบบผ่านสคริปต์ Windows |
+
+## โครงสร้างโปรเจกต์
+
+```text
+.
+├── backend/
+│   ├── scripts/          # สคริปต์สร้างและ seed ฐานข้อมูล
+│   ├── src/
+│   │   ├── config/       # การตั้งค่าและข้อมูลระบบ
+│   │   ├── middleware/   # Authentication และ authorization
+│   │   ├── routes/       # REST API routes
+│   │   ├── services/     # LINE และ business services
+│   │   ├── db.js         # การเชื่อมต่อ MySQL
+│   │   └── server.js     # จุดเริ่มต้น Express server
+│   ├── .env.example
 │   └── package.json
-├── frontend/           # Vue 3 Single Page Application (Vite + Pinia + Tailwind/CSS)
-│   ├── src/            # Pages, Components, Stores, Router, Services
+├── frontend/
+│   ├── src/
+│   │   ├── composables/
+│   │   ├── services/     # API และ service ฝั่ง Frontend
+│   │   ├── stores/       # Pinia stores
+│   │   ├── views/        # หน้าและฟอร์มของระบบ
+│   │   ├── App.vue
+│   │   └── main.js
 │   ├── .env.example
 │   └── package.json
 ├── database/
-│   └── schema.sql      # โครงสร้างตารางฐานข้อมูลและข้อมูลตั้งต้น
-├── it_equipment_db.sql # ไฟล์ Full SQL Dump สำรอง (กรณีต้องการ import ผ่าน phpMyAdmin)
-├── start.bat           # ตัวรันระบบอัตโนมัติ (Batch file)
-├── start.ps1           # ตัวรันระบบอัตโนมัติ (PowerShell)
-├── stop.bat            # สคริปต์หยุดระบบ (Batch file)
-├── stop.ps1            # สคริปต์หยุดระบบ (PowerShell)
-└── package.json        # Root script runner
+│   └── schema.sql        # โครงสร้างฐานข้อมูล
+├── docs/                 # เอกสารความต้องการ สถาปัตยกรรม และสถานะระบบ
+├── backups/              # บันทึกและข้อมูลสำรอง UI
+├── it_equipment_db.sql   # SQL dump สำหรับ import ด้วย phpMyAdmin
+├── start.bat / start.ps1 # สคริปต์เริ่มระบบบน Windows
+├── stop.bat / stop.ps1   # สคริปต์หยุดระบบบน Windows
+├── run-tunnel.bat        # สคริปต์เปิด public tunnel
+├── vercel.json           # การตั้งค่า Frontend บน Vercel
+└── package.json          # Root scripts และข้อมูลโปรเจกต์
 ```
 
+## เอกสารประกอบ
+
+- [ความต้องการและขอบเขตระบบ](docs/01-requirements.md)
+- [User Flow](docs/02-user-flow.md)
+- [Sitemap](docs/03-sitemap.md)
+- [Use Case](docs/04-use-case.md)
+- [Database ERD](docs/05-database-erd.md)
+- [Wireframe](docs/06-wireframe.md)
+- [สถานะระบบและรายการตรวจสอบ](docs/step10-status.md)
