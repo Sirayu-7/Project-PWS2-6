@@ -981,6 +981,53 @@ async function notifyMaintenanceTicket(maintenanceId) {
 }
 
 // ---------------- Per-User Rich Menu Synchronization ----------------
+let cachedRichMenuIds = {
+  borrower: process.env.LINE_RICH_MENU_BORROWER_ID || null,
+  staff: process.env.LINE_RICH_MENU_STAFF_ID || null,
+};
+
+async function getRichMenuIdByRole(isStaff) {
+  const targetKey = isStaff ? 'staff' : 'borrower';
+  if (cachedRichMenuIds[targetKey]) {
+    return cachedRichMenuIds[targetKey];
+  }
+
+  // 1. Check process.env
+  if (isStaff && process.env.LINE_RICH_MENU_STAFF_ID) {
+    cachedRichMenuIds.staff = process.env.LINE_RICH_MENU_STAFF_ID;
+    return cachedRichMenuIds.staff;
+  }
+  if (!isStaff && process.env.LINE_RICH_MENU_BORROWER_ID) {
+    cachedRichMenuIds.borrower = process.env.LINE_RICH_MENU_BORROWER_ID;
+    return cachedRichMenuIds.borrower;
+  }
+
+  // 2. Discover dynamically from LINE Messaging API
+  if (client) {
+    try {
+      const res = await client.getRichMenuList();
+      if (res && Array.isArray(res.richmenus)) {
+        for (const rm of res.richmenus) {
+          if (rm.name === 'IT_EQUIPMENT_BORROWER') cachedRichMenuIds.borrower = rm.richMenuId;
+          if (rm.name === 'IT_EQUIPMENT_STAFF') cachedRichMenuIds.staff = rm.richMenuId;
+        }
+      }
+    } catch (e) {
+      console.warn('[LINE_RICHMENU_DISCOVER_WARN]:', e.message);
+    }
+  }
+
+  // 3. Fallback to active known IDs deployed in this LINE OA
+  if (!cachedRichMenuIds.borrower) {
+    cachedRichMenuIds.borrower = 'richmenu-a9d70d1cabb13e29921562b36cb31296';
+  }
+  if (!cachedRichMenuIds.staff) {
+    cachedRichMenuIds.staff = 'richmenu-3b123a0c5144806a6449ee9217714152';
+  }
+
+  return cachedRichMenuIds[targetKey];
+}
+
 async function syncUserRichMenu(lineUserId, roleName, status = 'Active') {
   if (!client || !lineUserId) return null;
   try {
@@ -990,9 +1037,7 @@ async function syncUserRichMenu(lineUserId, roleName, status = 'Active') {
     }
 
     const isStaff = ['Administrator', 'Staff'].includes(roleName);
-    const richMenuId = isStaff
-      ? process.env.LINE_RICH_MENU_STAFF_ID
-      : process.env.LINE_RICH_MENU_BORROWER_ID;
+    const richMenuId = await getRichMenuIdByRole(isStaff);
 
     if (!richMenuId) return null;
 

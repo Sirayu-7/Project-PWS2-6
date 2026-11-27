@@ -400,6 +400,46 @@ async function handleWebhookEvent(event) {
   if (event.type === 'message' && event.message?.type === 'text') {
     const text = event.message.text.trim();
 
+    // Command: Unlink LINE account via chat
+    if (['ยกเลิกการเชื่อมต่อ', 'ยกเลิกการเชื่อมต่อ line', 'ยกเลิกเชื่อมต่อ'].includes(text.toLowerCase())) {
+      if (currentUser) {
+        await pool.execute('UPDATE users SET line_user_id = NULL WHERE user_id = ?', [currentUser.user_id]);
+        await lineService.syncUserRichMenu(lineUserId, null, 'Inactive');
+        try {
+          await writeAudit({ userId: currentUser.user_id, action: 'UNLINK_LINE_ACCOUNT', tableName: 'users', recordId: currentUser.user_id });
+        } catch {}
+        await lineService.replyMessage(event.replyToken, {
+          type: 'text',
+          text: '✅ ยกเลิกการเชื่อมต่อบัญชี LINE เรียบร้อยแล้วครับ\nเมนูของท่านถูกปรับกลับเป็นเมนูทั่วไป (Guest)',
+        });
+      } else {
+        await lineService.syncUserRichMenu(lineUserId, null, 'Inactive');
+        await lineService.replyMessage(event.replyToken, {
+          type: 'text',
+          text: 'บัญชี LINE ของท่านยังไม่ได้เชื่อมต่อกับระบบครับ (เมนูปัจจุบันเป็น Guest)',
+        });
+      }
+      return;
+    }
+
+    // Command: Force refresh rich menu matching database role
+    if (['รีเฟรชเมนู', 'อัปเดตเมนู', 'ซิงค์เมนู'].includes(text.toLowerCase())) {
+      if (currentUser) {
+        await lineService.syncUserRichMenu(lineUserId, currentUser.role_name, currentUser.status);
+        await lineService.replyMessage(event.replyToken, {
+          type: 'text',
+          text: `🔄 อัปเดตเมนูของท่านเรียบร้อยแล้วครับ!\nผู้ใช้งาน: ${currentUser.name}\nสิทธิ์: ${currentUser.role_name}`,
+        });
+      } else {
+        await lineService.syncUserRichMenu(lineUserId, null, 'Inactive');
+        await lineService.replyMessage(event.replyToken, {
+          type: 'text',
+          text: '🔄 อัปเดตเมนูกลับเป็นเมนูทั่วไป (Guest) เรียบร้อยแล้วครับ',
+        });
+      }
+      return;
+    }
+
     // Account linking PIN (6 digits)
     if (/^\d{6}$/.test(text)) {
       const [tokens] = await pool.execute(`
