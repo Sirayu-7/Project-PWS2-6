@@ -2,17 +2,19 @@ import { createApp } from 'vue'
 import { createPinia } from 'pinia'
 import { createRouter, createWebHistory } from 'vue-router'
 import App from './App.vue'
-import LoginView from './views/LoginView.vue'
-import DashboardView from './views/DashboardView.vue'
-import EquipmentView from './views/EquipmentView.vue'
-import LoanView from './views/LoanView.vue'
-import MaintenanceView from './views/MaintenanceView.vue'
-import CategoriesView from './views/CategoriesView.vue'
-import ReportsView from './views/ReportsView.vue'
-import ReportPrintView from './views/ReportPrintView.vue'
-import UsersView from './views/UsersView.vue'
-import AuditView from './views/AuditView.vue'
 import './styles.css'
+
+// Route-level code splitting (Lazy Loading) for lightning-fast initial load
+const LoginView = () => import('./views/LoginView.vue')
+const DashboardView = () => import('./views/DashboardView.vue')
+const EquipmentView = () => import('./views/EquipmentView.vue')
+const CategoriesView = () => import('./views/CategoriesView.vue')
+const LoanView = () => import('./views/LoanView.vue')
+const MaintenanceView = () => import('./views/MaintenanceView.vue')
+const ReportsView = () => import('./views/ReportsView.vue')
+const ReportPrintView = () => import('./views/ReportPrintView.vue')
+const UsersView = () => import('./views/UsersView.vue')
+const AuditView = () => import('./views/AuditView.vue')
 
 const router = createRouter({
   history: createWebHistory(),

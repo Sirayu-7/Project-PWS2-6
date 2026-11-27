@@ -7,11 +7,13 @@
     "start": "node src/server.js",
     "dev": "node --watch src/server.js",
     "init-db": "node scripts/init-db.js",
-    "setup-richmenu": "node scripts/setup-richmenu.js"
+    "setup-richmenu": "node scripts/setup-richmenu.js",
+    "optimize-indexes": "node scripts/optimize-indexes.js"
   },
   "dependencies": {
     "@line/bot-sdk": "^11.4.0",
     "bcryptjs": "^3.0.0",
+    "compression": "^1.8.2",
     "cors": "^2.8.5",
     "dotenv": "^17.0.0",
     "express": "^5.0.0",

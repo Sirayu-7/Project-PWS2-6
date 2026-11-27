@@ -7,4 +7,14 @@ export default defineConfig({
     port: 5173,
     host: '::',
   },
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          'vendor': ['vue', 'vue-router', 'pinia', 'axios'],
+        },
+      },
+    },
+    chunkSizeWarningLimit: 600,
+  },
 })

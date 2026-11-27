@@ -1,5 +1,6 @@
 const express = require('express');
 const cors = require('cors');
+const compression = require('compression');
 require('dotenv').config();
 
 const authRoutes = require('./routes/auth');
@@ -21,6 +22,7 @@ const { emitToAll } = require('./services/realtime');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+app.use(compression());
 app.use(cors({ origin: true, credentials: true }));
 app.use(express.json({ verify: (req, res, buf) => { req.rawBody = buf; } }));
 
