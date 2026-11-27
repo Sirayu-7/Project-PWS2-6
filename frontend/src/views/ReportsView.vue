@@ -250,8 +250,11 @@
 
 <script setup>
 import { ref, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
 import api from '../services/api'
 import { useAutoRefresh } from '../composables/useAutoRefresh'
+
+const router = useRouter()
 
 const error = ref('')
 const loading = ref(false)
@@ -362,7 +365,17 @@ function clearFilters() {
 }
 
 function printReport() {
-  window.print()
+  const query = { tab: activeTab.value }
+  if (filters.value.from) query.from = filters.value.from
+  if (filters.value.to) query.to = filters.value.to
+  if (filters.value.status) query.status = filters.value.status
+  if (filters.value.categoryId) query.categoryId = String(filters.value.categoryId)
+
+  const resolved = router.resolve({ path: '/reports/print', query })
+  const win = window.open(resolved.href, '_blank')
+  if (!win) {
+    router.push({ path: '/reports/print', query })
+  }
 }
 
 // Export CSV Helper with UTF-8 BOM

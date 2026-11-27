@@ -980,10 +980,35 @@ async function notifyMaintenanceTicket(maintenanceId) {
   }
 }
 
+// ---------------- Per-User Rich Menu Synchronization ----------------
+async function syncUserRichMenu(lineUserId, roleName, status = 'Active') {
+  if (!client || !lineUserId) return null;
+  try {
+    if (status !== 'Active' || !roleName) {
+      await client.unlinkRichMenuIdFromUser(lineUserId);
+      return { success: true, action: 'unlinked' };
+    }
+
+    const isStaff = ['Administrator', 'Staff'].includes(roleName);
+    const richMenuId = isStaff
+      ? process.env.LINE_RICH_MENU_STAFF_ID
+      : process.env.LINE_RICH_MENU_BORROWER_ID;
+
+    if (!richMenuId) return null;
+
+    await client.linkRichMenuIdToUser(lineUserId, richMenuId);
+    return { success: true, action: 'linked', richMenuId, role: roleName };
+  } catch (e) {
+    console.error(`[LINE_RICHMENU_SYNC_ERROR for ${lineUserId}]:`, e.message);
+    return null;
+  }
+}
+
 module.exports = {
   sendPush,
   replyMessage,
   sendToStaffChannel,
+  syncUserRichMenu,
   buildLoanRequestCard,
   buildLoanDecisionCard,
   buildOverdueCard,

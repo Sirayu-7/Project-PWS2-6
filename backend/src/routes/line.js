@@ -79,7 +79,15 @@ router.get('/status', authenticateToken, async (req, res) => {
 // 3. Unlink LINE account
 router.post('/unlink', authenticateToken, async (req, res) => {
   try {
+    const [curr] = await pool.execute('SELECT line_user_id FROM users WHERE user_id = ?', [req.user.id]);
+    const oldLineId = curr.length ? curr[0].line_user_id : null;
+
     await pool.execute('UPDATE users SET line_user_id = NULL WHERE user_id = ?', [req.user.id]);
+    if (oldLineId) {
+      try {
+        await lineService.syncUserRichMenu(oldLineId, null, 'Inactive');
+      } catch {}
+    }
     try {
       await writeAudit({ userId: req.user.id, action: 'UNLINK_LINE_ACCOUNT', tableName: 'users', recordId: req.user.id });
     } catch {}
@@ -422,6 +430,13 @@ async function handleWebhookEvent(event) {
 
       emitToUser(match.user_id, 'line:linked', { line_user_id: lineUserId });
 
+      // Automatically sync Per-User Rich Menu matching their role
+      try {
+        await lineService.syncUserRichMenu(lineUserId, match.role_name, 'Active');
+      } catch (err) {
+        console.warn('[LINE_RICHMENU_LINK_WARN]:', err.message);
+      }
+
       await lineService.replyMessage(event.replyToken, {
         type: 'text',
         text: `✅ เชื่อมต่อบัญชีสำเร็จ!\nคุณ: ${match.name}\nสิทธิ์: ${match.role_name}\n\nคุณจะได้รับการแจ้งเตือนและการทำรายการผ่าน LINE ตั้งแต่นี้เป็นต้นไปครับ แตะปุ่มลัดด้านล่างเพื่อเริ่มใช้งานได้เลย`,
@@ -582,12 +597,21 @@ async function handleWebhookEvent(event) {
         text.includes('งานซ่อม') ||
         text.includes('แจ้งซ่อม')
       ) {
+        if (!['Administrator', 'Staff'].includes(currentUser.role_name)) {
+          await lineService.replyMessage(event.replyToken, {
+            type: 'text',
+            text: '⛔ ขออภัย คำสั่งนี้สำหรับเจ้าหน้าที่ดูแลอุปกรณ์เท่านั้นครับ',
+            quickReply: getRoleQuickReply(currentUser.role_name),
+          });
+          return;
+        }
+
         const [tickets] = await pool.execute(`
           SELECT m.*, e.equipment_name, e.asset_code, u.name AS reporter_name
           FROM maintenance m
           JOIN equipment e ON e.equipment_id = m.equipment_id
           JOIN users u ON u.user_id = m.reporter_id
-          WHERE m.status IN ('Reported', 'In_Progress')
+          WHERE m.status IN ('Reported', 'Received', 'Diagnosing', 'Repairing')
           ORDER BY m.maintenance_id DESC
           LIMIT 5
         `);

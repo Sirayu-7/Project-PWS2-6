@@ -9,6 +9,7 @@ import LoanView from './views/LoanView.vue'
 import MaintenanceView from './views/MaintenanceView.vue'
 import CategoriesView from './views/CategoriesView.vue'
 import ReportsView from './views/ReportsView.vue'
+import ReportPrintView from './views/ReportPrintView.vue'
 import UsersView from './views/UsersView.vue'
 import AuditView from './views/AuditView.vue'
 import './styles.css'
@@ -27,6 +28,7 @@ const router = createRouter({
     { path: '/loan', component: LoanView, meta: { roles: ['Administrator', 'Staff', 'Borrower'] } },
     { path: '/maintenance', component: MaintenanceView, meta: { roles: ['Administrator', 'Staff', 'Borrower'] } },
     { path: '/reports', component: ReportsView, meta: { roles: ['Administrator', 'Staff'] } },
+    { path: '/reports/print', component: ReportPrintView, meta: { roles: ['Administrator', 'Staff'], standalone: true } },
     { path: '/users', component: UsersView, meta: { roles: ['Administrator'] } },
     { path: '/audit', component: AuditView, meta: { roles: ['Administrator'] } },
   ],

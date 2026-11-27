@@ -657,3 +657,26 @@ textarea {
     width: 100%;
   }
 }
+
+@media print {
+  body {
+    background: #fff !important;
+  }
+
+  .sidebar,
+  .topbar,
+  .realtime-status,
+  .sidebar-backdrop {
+    display: none !important;
+  }
+
+  .main {
+    width: 100% !important;
+    margin-left: 0 !important;
+  }
+
+  .content {
+    padding: 0 !important;
+    max-width: none !important;
+  }
+}

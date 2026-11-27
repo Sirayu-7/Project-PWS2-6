@@ -89,9 +89,12 @@
               <option>Inactive</option>
             </select>
           </label>
+          <div v-if="error" class="alert error">{{ error }}</div>
           <div class="modal-actions">
             <button type="button" @click="closeModal">ยกเลิก</button>
-            <button class="primary" type="submit">บันทึก</button>
+            <button class="primary" type="submit" :disabled="saving">
+              {{ saving ? 'กำลังบันทึก...' : 'บันทึก' }}
+            </button>
           </div>
         </form>
       </div>
@@ -113,6 +116,7 @@ const error = ref('')
 const success = ref('')
 const showModal = ref(false)
 const editing = ref(null)
+const saving = ref(false)
 
 const form = reactive({
   name: '',
@@ -142,6 +146,8 @@ const load = async () => {
 }
 
 const openCreate = () => {
+  error.value = ''
+  success.value = ''
   editing.value = null
   Object.assign(form, {
     name: '',
@@ -154,6 +160,8 @@ const openCreate = () => {
 }
 
 const openEdit = (u) => {
+  error.value = ''
+  success.value = ''
   editing.value = u
   Object.assign(form, {
     name: u.name,
@@ -170,6 +178,10 @@ const closeModal = () => {
 }
 
 const save = async () => {
+  if (saving.value) return
+  saving.value = true
+  error.value = ''
+  success.value = ''
   try {
     const p = {
       name: form.name,
@@ -185,6 +197,8 @@ const save = async () => {
     await load()
   } catch (e) {
     error.value = e.response?.data?.message || 'บันทึกไม่สำเร็จ'
+  } finally {
+    saving.value = false
   }
 }
 
@@ -226,7 +240,11 @@ useAutoRefresh(load)
   border: 0;
   border-radius: 8px;
   padding: 10px 16px;
+  font-weight: 600;
   cursor: pointer;
+}
+.primary:hover {
+  background: #1d4ed8;
 }
 .toolbar {
   display: flex;
@@ -349,13 +367,28 @@ td button {
 }
 .modal-actions button {
   padding: 10px 16px;
-  border: 1px solid #dbe2ea;
+  border: 1px solid #cbd5e1;
   border-radius: 8px;
-  background: white;
+  background: #ffffff;
+  color: #334155;
+  font-weight: 500;
   cursor: pointer;
+}
+.modal-actions button:hover {
+  background: #f8fafc;
 }
 .modal-actions .primary {
   border: 0;
+  background: #2563eb;
+  color: #ffffff;
+  font-weight: 600;
+}
+.modal-actions .primary:hover {
+  background: #1d4ed8;
+}
+.modal-actions .primary:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 @media (max-width: 640px) {
   .page-head {

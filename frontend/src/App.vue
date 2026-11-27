@@ -275,7 +275,7 @@ import { useAuthStore } from './stores/auth'
 
 const route = useRoute(), router = useRouter()
 const auth = useAuthStore()
-const isAuthPage = computed(() => route.path === '/login' || !!route.meta?.public)
+const isAuthPage = computed(() => route.path === '/login' || !!route.meta?.public || !!route.meta?.standalone)
 const user = computed(() => {
   if (auth.user && auth.user.name) return auth.user
   try {
