@@ -86,11 +86,11 @@ router.post('/unlink', authenticateToken, async (req, res) => {
     if (oldLineId) {
       try {
         await lineService.syncUserRichMenu(oldLineId, null, 'Inactive');
-      } catch {}
+      } catch { }
     }
     try {
       await writeAudit({ userId: req.user.id, action: 'UNLINK_LINE_ACCOUNT', tableName: 'users', recordId: req.user.id });
-    } catch {}
+    } catch { }
     res.json({ success: true, message: 'ยกเลิกการเชื่อมต่อ LINE เรียบร้อย' });
   } catch (e) {
     console.error('[LINE_UNLINK_ERROR]:', e.message);
@@ -224,7 +224,7 @@ async function handleWebhookEvent(event) {
 
         try {
           await writeAudit({ userId: currentUser.user_id, action: 'APPROVE_LOAN', tableName: 'loans', recordId: loanId });
-        } catch {}
+        } catch { }
 
         // Reply to staff
         await lineService.replyMessage(event.replyToken, {
@@ -366,7 +366,7 @@ async function handleWebhookEvent(event) {
 
       try {
         await writeAudit({ userId: currentUser.user_id, action: 'UPDATE_MAINTENANCE_STATUS', tableName: 'maintenance', recordId: maintId });
-      } catch {}
+      } catch { }
 
       emitToAll('data:refresh', { source: '/api/maintenance', method: 'PUT' });
 
@@ -407,7 +407,7 @@ async function handleWebhookEvent(event) {
         await lineService.syncUserRichMenu(lineUserId, null, 'Inactive');
         try {
           await writeAudit({ userId: currentUser.user_id, action: 'UNLINK_LINE_ACCOUNT', tableName: 'users', recordId: currentUser.user_id });
-        } catch {}
+        } catch { }
         await lineService.replyMessage(event.replyToken, {
           type: 'text',
           text: '✅ ยกเลิกการเชื่อมต่อบัญชี LINE เรียบร้อยแล้วครับ\nเมนูของท่านถูกปรับกลับเป็นเมนูทั่วไป (Guest)',
@@ -466,7 +466,7 @@ async function handleWebhookEvent(event) {
 
       try {
         await writeAudit({ userId: match.user_id, action: 'LINK_LINE_ACCOUNT', tableName: 'users', recordId: match.user_id });
-      } catch {}
+      } catch { }
 
       emitToUser(match.user_id, 'line:linked', { line_user_id: lineUserId });
 
@@ -535,7 +535,7 @@ async function handleWebhookEvent(event) {
 
           try {
             await writeAudit({ userId: currentUser.user_id, action: 'REJECT_LOAN', tableName: 'loans', recordId: loanId });
-          } catch {}
+          } catch { }
 
           // Reply to staff
           await lineService.replyMessage(event.replyToken, {
@@ -703,7 +703,7 @@ async function handleWebhookEvent(event) {
         text === 'เข้าเว็บ' ||
         text.includes('เปิดเว็บ')
       ) {
-        const siteUrl = process.env.SYSTEM_WEB_URL || 'https://project-pws2-6-333.vercel.app';
+        const siteUrl = process.env.SYSTEM_WEB_URL || 'https://project-pws2-6.vercel.app';
         await lineService.replyMessage(event.replyToken, {
           type: 'flex',
           altText: '🌐 ลิงก์เข้าสู่ระบบ IT Equipment',
