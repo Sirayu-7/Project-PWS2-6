@@ -1019,10 +1019,10 @@ async function getRichMenuIdByRole(isStaff) {
 
   // 3. Fallback to active known IDs deployed in this LINE OA
   if (!cachedRichMenuIds.borrower) {
-    cachedRichMenuIds.borrower = 'richmenu-a9d70d1cabb13e29921562b36cb31296';
+    cachedRichMenuIds.borrower = 'richmenu-13f2d70dc347c6d80a467e9ee419e6bf';
   }
   if (!cachedRichMenuIds.staff) {
-    cachedRichMenuIds.staff = 'richmenu-3b123a0c5144806a6449ee9217714152';
+    cachedRichMenuIds.staff = 'richmenu-802d9364656d0112c4f53d896b5fc5d8';
   }
 
   return cachedRichMenuIds[targetKey];

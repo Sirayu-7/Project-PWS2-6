@@ -29,7 +29,7 @@ for (const [name, p] of Object.entries({ Guest: guestImgPath, Borrower: borrower
   }
 }
 
-const defaultWebUrl = 'https://project-pws2-6-333.vercel.app';
+const defaultWebUrl = 'https://project-pws2-6.vercel.app';
 const webUrl = (process.env.SYSTEM_WEB_URL && process.env.SYSTEM_WEB_URL.startsWith('http'))
   ? process.env.SYSTEM_WEB_URL
   : defaultWebUrl;
@@ -73,7 +73,7 @@ const borrowerMenu = {
     },
     {
       bounds: { x: 1667, y: 0, width: 833, height: 843 },
-      action: { type: 'uri', label: 'เปิดเว็บยืม/แจ้งซ่อม', uri: webUrl },
+      action: { type: 'uri', label: 'เปิดเว็บยืม/แจ้งซ่อม', uri: `${webUrl}/loan` },
     },
   ],
 };
@@ -183,7 +183,22 @@ async function updateEnvFile(ids) {
 
 async function syncExistingDbUsers(ids) {
   try {
-    const pool = require('../src/db');
+    let pool;
+    try {
+      pool = require('../src/db');
+      await pool.query('SELECT 1');
+    } catch {
+      const mysql = require('mysql2/promise');
+      pool = mysql.createPool({
+        host: 'gateway01.ap-northeast-1.prod.aws.tidbcloud.com',
+        port: 4000,
+        user: '2T39WyZ4bQh9tE2.root',
+        password: 'lUxaX2k8cqGoIMTk',
+        database: 'test',
+        ssl: { rejectUnauthorized: false }
+      });
+    }
+
     const [rows] = await pool.execute(`
       SELECT u.user_id, u.line_user_id, r.role_name 
       FROM users u
@@ -270,6 +285,7 @@ async function run() {
   console.log(`- Guest ID (Default): ${guestId}`);
   console.log(`- Borrower ID:       ${borrowerId}`);
   console.log(`- Staff ID:          ${staffId}`);
+  process.exit(0);
 }
 
 run().catch((err) => {
