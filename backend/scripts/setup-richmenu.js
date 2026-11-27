@@ -29,16 +29,10 @@ for (const [name, p] of Object.entries({ Guest: guestImgPath, Borrower: borrower
   }
 }
 
-const webUrl = process.env.SYSTEM_WEB_URL && process.env.SYSTEM_WEB_URL.startsWith('http')
+const defaultWebUrl = 'https://project-pws2-6-333.vercel.app';
+const webUrl = (process.env.SYSTEM_WEB_URL && process.env.SYSTEM_WEB_URL.startsWith('http'))
   ? process.env.SYSTEM_WEB_URL
-  : null;
-
-function makeWebAction(label, fallbackText) {
-  if (webUrl) {
-    return { type: 'uri', label, uri: webUrl };
-  }
-  return { type: 'message', label, text: fallbackText };
-}
+  : defaultWebUrl;
 
 // 1. Definition of Guest Menu (2500 x 843)
 const guestMenu = {
@@ -49,7 +43,7 @@ const guestMenu = {
   areas: [
     {
       bounds: { x: 0, y: 0, width: 833, height: 843 },
-      action: makeWebAction('ผูกบัญชีระบบ', 'วิธีเชื่อมต่อ'),
+      action: { type: 'uri', label: 'ผูกบัญชีระบบ', uri: `${webUrl}/login` },
     },
     {
       bounds: { x: 833, y: 0, width: 834, height: 843 },
@@ -79,7 +73,7 @@ const borrowerMenu = {
     },
     {
       bounds: { x: 1667, y: 0, width: 833, height: 843 },
-      action: makeWebAction('เปิดเว็บยืม/แจ้งซ่อม', 'ช่วยเหลือ'),
+      action: { type: 'uri', label: 'เปิดเว็บยืม/แจ้งซ่อม', uri: webUrl },
     },
   ],
 };
@@ -111,7 +105,7 @@ const staffMenu = {
     },
     {
       bounds: { x: 833, y: 843, width: 834, height: 843 },
-      action: makeWebAction('เปิดเว็บระบบ', 'ช่วยเหลือ'),
+      action: { type: 'uri', label: 'เปิดเว็บระบบ', uri: webUrl },
     },
     {
       bounds: { x: 1667, y: 843, width: 833, height: 843 },

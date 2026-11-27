@@ -655,6 +655,62 @@ async function handleWebhookEvent(event) {
         return;
       }
 
+      // Keyword: เปิดเว็บระบบ / เข้าเว็บ
+      if (
+        text === 'เปิดเว็บระบบ' ||
+        text === 'เปิดเว็บ' ||
+        text === 'เข้าสู่ระบบ' ||
+        text === 'เข้าเว็บ' ||
+        text.includes('เปิดเว็บ')
+      ) {
+        const siteUrl = process.env.SYSTEM_WEB_URL || 'https://project-pws2-6-333.vercel.app';
+        await lineService.replyMessage(event.replyToken, {
+          type: 'flex',
+          altText: '🌐 ลิงก์เข้าสู่ระบบ IT Equipment',
+          contents: {
+            type: 'bubble',
+            header: {
+              type: 'box',
+              layout: 'vertical',
+              backgroundColor: '#1e3a8a',
+              paddingAll: '16px',
+              contents: [
+                { type: 'text', text: '🌐 ระบบจัดการอุปกรณ์ไอที', weight: 'bold', color: '#ffffff', size: 'md' },
+                { type: 'text', text: 'เข้าใช้งานผ่านเว็บบราวเซอร์', color: '#93c5fd', size: 'xs', margin: 'xs' },
+              ],
+            },
+            body: {
+              type: 'box',
+              layout: 'vertical',
+              spacing: 'md',
+              paddingAll: '16px',
+              contents: [
+                { type: 'text', text: 'คุณสามารถเข้าสู่ระบบผ่านเว็บเพื่อจัดการข้อมูล, ยืม-คืน, แจ้งซ่อม และดูรายงานได้เต็มรูปแบบครับ', size: 'xs', color: '#475569', wrap: true },
+              ],
+            },
+            footer: {
+              type: 'box',
+              layout: 'vertical',
+              paddingAll: '12px',
+              contents: [
+                {
+                  type: 'button',
+                  style: 'primary',
+                  color: '#2563eb',
+                  action: {
+                    type: 'uri',
+                    label: '🚀 เปิดเข้าสู่ระบบผ่านเว็บ',
+                    uri: siteUrl,
+                  },
+                },
+              ],
+            },
+          },
+          quickReply: getRoleQuickReply(currentUser.role_name),
+        });
+        return;
+      }
+
       // Keyword: ช่วยเหลือ / เมนู
       if (
         text === 'ช่วยเหลือ' ||
